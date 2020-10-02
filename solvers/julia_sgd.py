@@ -19,6 +19,9 @@ class Solver(JuliaSolver):
     name = 'Julia-SGD'
     stop_strategy = 'iteration'
 
+    # Julia package dependencies
+    julia_requirements = ['StatsBase']
+
     def set_objective(self, X, y, lmbd):
         self.X, self.y, self.lmbd = X, y, lmbd
 
