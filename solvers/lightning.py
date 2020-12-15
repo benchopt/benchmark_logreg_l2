@@ -9,6 +9,8 @@ with safe_import_context() as import_ctx:
 class Solver(BaseSolver):
     name = 'Lightning'
 
+    # conda install -c conda-forge sklearn-contrib-lightning
+    # solved the problem
     install_cmd = 'conda'
     requirements = [
         'pip:git+https://github.com/scikit-learn-contrib/lightning.git'
