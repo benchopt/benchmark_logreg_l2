@@ -10,7 +10,7 @@ class Solver(BaseSolver):
     name = 'Lightning'
 
     # conda install -c conda-forge sklearn-contrib-lightning
-    # solved the problem
+    # did not install lightning with CDClassifier ...
     install_cmd = 'conda'
     requirements = [
         'pip:git+https://github.com/scikit-learn-contrib/lightning.git'
