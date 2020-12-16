@@ -1,6 +1,6 @@
 import numpy as np
 
-from benchopt.base import BaseDataset
+from benchopt import BaseDataset
 
 
 class Dataset(BaseDataset):
