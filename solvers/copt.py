@@ -38,7 +38,7 @@ class Solver(BaseSolver):
         X, y, solver = self.X, self.y, self.solver
 
         n_features = X.shape[1]
-        f = copt.loss.LogLoss(X, y, alpha=self.lmbd)
+        f = copt.loss.LogLoss(X, y, alpha=self.lmbd / len(X))
 
         warnings.filterwarnings('ignore', category=RuntimeWarning)
 
