@@ -17,6 +17,7 @@ class Solver(BaseSolver):
 
     parameters = {
         'accelerated': [False, True],
+        'line_search': [False, True],
         'solver': ['pgd', 'svrg', 'saga'],
     }
 
@@ -29,8 +30,11 @@ class Solver(BaseSolver):
                 f"n_samples ({X.shape[0]})"
             )
             return True, msg
-        if self.accelerated and self.solver != "pgd":
-            return True, f"accelerated is not available for {self.solver}"
+        if (self.accelerated or self.line_search) and self.solver != "pgd":
+            return (
+                True,
+                f"accelerated or line_search is not available for {self.solver}"
+            )
 
         return False, None
 
@@ -50,7 +54,10 @@ class Solver(BaseSolver):
         warnings.filterwarnings('ignore', category=RuntimeWarning)
 
         if solver == 'pgd':
-            step_size = 1.0 / f.lipschitz
+            if self.line_search:
+                step_size = 'backtracking'
+            else:
+                step_size = 1.0 / f.lipschitz
             result = cp.minimize_proximal_gradient(
                 f.f_grad,
                 np.zeros(n_features),
