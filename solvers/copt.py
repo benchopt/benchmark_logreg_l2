@@ -45,7 +45,7 @@ class Solver(BaseSolver):
         X, y, solver = self.X, self.y, self.solver
 
         n_features = X.shape[1]
-        f = copt.loss.LogLoss(X, y, alpha=self.lmbd / len(X))
+        f = copt.loss.LogLoss(X, y, alpha=self.lmbd / X.shape[0])
 
         warnings.filterwarnings('ignore', category=RuntimeWarning)
 
@@ -70,7 +70,7 @@ class Solver(BaseSolver):
                 step_size=step_size,
                 tol=0,
                 max_iter=n_iter,
-                alpha=self.lmbd / len(X)
+                alpha=self.lmbd / X.shape[0]
             )
         else:
             assert solver == 'svrg'
@@ -83,7 +83,7 @@ class Solver(BaseSolver):
                 step_size=step_size,
                 tol=0,
                 max_iter=n_iter,
-                alpha=self.lmbd / len(X)
+                alpha=self.lmbd / X.shape[0]
             )
 
         self.beta = result.x
