@@ -24,7 +24,11 @@ class Solver(BaseSolver):
         if X.shape[1] > 50000:
             return True, "problem too large."
         if X.shape[1] > X.shape[0] and self.solver in ['svrg', 'saga']:
-            return True, "n_features is bigger than n_samples"
+            msg = (
+                f"n_features ({X.shape[1]}) is bigger than "
+                f"n_samples ({X.shape[0]})"
+            )
+            return True, msg
         if self.accelerated and self.solver != "pgd":
             return True, f"accelerated is not available for {self.solver}"
 
@@ -33,6 +37,9 @@ class Solver(BaseSolver):
     def set_objective(self, X, y, lmbd):
         y = (y > 0).astype(np.float64)
         self.X, self.y, self.lmbd = X, y, lmbd
+
+        # Make sure we cache the numba compilation.
+        self.run(1)
 
     def run(self, n_iter):
         X, y, solver = self.X, self.y, self.solver
@@ -63,6 +70,7 @@ class Solver(BaseSolver):
                 step_size=step_size,
                 tol=0,
                 max_iter=n_iter,
+                alpha=self.lmbd / len(X)
             )
         else:
             assert solver == 'svrg'
@@ -75,6 +83,7 @@ class Solver(BaseSolver):
                 step_size=step_size,
                 tol=0,
                 max_iter=n_iter,
+                alpha=self.lmbd / len(X)
             )
 
         self.beta = result.x
