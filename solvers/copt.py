@@ -33,7 +33,8 @@ class Solver(BaseSolver):
         if (self.accelerated or self.line_search) and self.solver != "pgd":
             return (
                 True,
-                f"accelerated or line_search is not available for {self.solver}"
+                f"accelerated or line_search is not available for "
+                f"{self.solver}"
             )
 
         return False, None
@@ -47,21 +48,26 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         X, y, solver = self.X, self.y, self.solver
-
         n_features = X.shape[1]
+
+        x0 = np.zeros(n_features)
+        if n_iter == 0:
+            return x0
+
         f = copt.loss.LogLoss(X, y, alpha=self.lmbd / X.shape[0])
 
         warnings.filterwarnings('ignore', category=RuntimeWarning)
 
         if solver == 'pgd':
             if self.line_search:
-                step_size = 'backtracking'
+                step = 'backtracking'
             else:
-                step_size = 1.0 / f.lipschitz
+                def step(x):
+                    return 1.0 / f.lipschitz
             result = cp.minimize_proximal_gradient(
                 f.f_grad,
-                np.zeros(n_features),
-                step=lambda x: step_size,
+                x0,
+                step=step,
                 tol=0,
                 max_iter=n_iter,
                 jac=True,
@@ -73,7 +79,7 @@ class Solver(BaseSolver):
                 f.partial_deriv,
                 X,
                 y,
-                np.zeros(n_features),
+                x0,
                 step_size=step_size,
                 tol=0,
                 max_iter=n_iter,
@@ -86,7 +92,7 @@ class Solver(BaseSolver):
                 f.partial_deriv,
                 X,
                 y,
-                np.zeros(n_features),
+                x0,
                 step_size=step_size,
                 tol=0,
                 max_iter=n_iter,
