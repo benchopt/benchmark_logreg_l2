@@ -22,8 +22,11 @@ class Solver(BaseSolver):
     }
 
     def skip(self, X, y, lmbd):
-        if X.shape[1] > 50000:
-            return True, "problem too large."
+        if (X.shape[1] > 50_000) and self.solver not in ['svrg', 'saga']:
+            return True, (
+                f"problem too large (n_samples={X.shape[1]} > 50000) "
+                f"for solver {self.solver}."
+            )
         if X.shape[1] > X.shape[0] and self.solver in ['svrg', 'saga']:
             msg = (
                 f"n_features ({X.shape[1]}) is bigger than "
