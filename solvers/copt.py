@@ -24,7 +24,7 @@ class Solver(BaseSolver):
     def skip(self, X, y, lmbd):
         if (X.shape[1] > 50_000) and self.solver not in ['svrg', 'saga']:
             return True, (
-                f"problem too large (n_samples={X.shape[1]} > 50000) "
+                f"problem too large (n_features={X.shape[1]} > 50000) "
                 f"for solver {self.solver}."
             )
         if X.shape[1] > X.shape[0] and self.solver in ['svrg', 'saga']:
@@ -47,7 +47,8 @@ class Solver(BaseSolver):
         self.X, self.y, self.lmbd = X, y, lmbd
 
         # Make sure we cache the numba compilation.
-        self.run(1)
+        if self.solver in ['svrg', 'saga']:
+            self.run(1)
 
     def run(self, n_iter):
         X, y, solver = self.X, self.y, self.solver
@@ -55,7 +56,8 @@ class Solver(BaseSolver):
 
         x0 = np.zeros(n_features)
         if n_iter == 0:
-            return x0
+            self.beta = x0
+            return
 
         f = copt.loss.LogLoss(X, y, alpha=self.lmbd / X.shape[0])
 
