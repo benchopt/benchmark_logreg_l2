@@ -1,4 +1,5 @@
 import warnings
+import os
 from benchopt import BaseSolver, safe_import_context
 from torch.utils.data.dataset import TensorDataset
 
@@ -7,9 +8,12 @@ with safe_import_context() as import_ctx:
     from torch.utils.data import DataLoader
     import chop
 
+<<<<<<< HEAD
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+=======
+>>>>>>> 3eeaa2a6bd03dd6ad1b8994c96420848fc0cb999
 
 class Solver(BaseSolver):
     name = 'chop'
@@ -23,10 +27,14 @@ class Solver(BaseSolver):
         'stochastic': [False, True],
         'batch_size': [32, 128, 200, 'full'],
         'normalization': ['none', 'L2', 'Linf', 'sign'],
-        'momentum': [0., 0.9]
+        'momentum': [0., 0.9],
+        'device': ['cuda', 'cpu']
         }
 
     def skip(self, X, y, lmbd):
+        if self.device == 'cuda' and not torch.cuda.is_available():
+            return True, "CUDA is not available."
+
         if not self.stochastic and self.batch_size != 'full':
             return True, "We only run stochastic=False if batch_size=='full'."
 
@@ -56,11 +64,13 @@ class Solver(BaseSolver):
     def set_objective(self, X, y, lmbd):
         self.lmbd = lmbd
 
+        if self.device == 'cpu':
+            os.environ["CUDA_VISIBLE_DEVICES"] = ""
+        elif 'CUDA_VISIBLE_DEVICES' in os.environ:
+            del os.environ["CUDA_VISIBLE_DEVICES"]
+
         self.X = torch.tensor(X).to(device)
         self.y = torch.tensor(y > 0, dtype=torch.float64).to(device)
-
-        # Not sure if this is useful here
-        self.run(1)
 
     def run(self, n_iter):
         X, y, solver = self.X, self.y, self.solver
@@ -69,7 +79,8 @@ class Solver(BaseSolver):
 
         x0 = torch.zeros(n_features, dtype=X.dtype, device=device)
         if n_iter == 0:
-            return x0
+            self.beta = x0
+            return
 
         criterion = torch.nn.BCEWithLogitsLoss()
 
