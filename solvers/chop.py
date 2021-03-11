@@ -1,5 +1,4 @@
 import warnings
-import os
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
@@ -69,7 +68,7 @@ class Solver(BaseSolver):
 
         _, n_features = X.shape
 
-        self.x0 = torch.zeros(n_features, dtype=X.dtype, device=X.device)
+        self.x0 = torch.zeros(n_features, dtype=self.X.dtype, device=self.X.device)
         self.criterion = torch.nn.BCEWithLogitsLoss()
 
     def run_stochastic(self, n_iter):
@@ -91,7 +90,7 @@ class Solver(BaseSolver):
         # Optimization loop
         counter = 0
 
-        alpha = self.lmbd / X.size(0)
+        alpha = self.lmbd / self.X.size(0)
 
         while counter < n_iter:
 
@@ -117,9 +116,9 @@ class Solver(BaseSolver):
         @chop.utils.closure
         def logloss(x):
 
-            alpha = self.lmbd / X.size(0)
-            out = chop.utils.bmv(X, x)
-            loss = self.criterion(out, y)
+            alpha = self.lmbd / self.X.size(0)
+            out = chop.utils.bmv(self.X, x)
+            loss = self.criterion(out, self.y)
             reg = .5 * alpha * (x ** 2).sum()
             return loss + reg
 
