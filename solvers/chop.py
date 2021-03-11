@@ -2,7 +2,6 @@ import warnings
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
-    import numpy as np
     import torch
     import chop
 
@@ -23,9 +22,9 @@ class Solver(BaseSolver):
 
     def set_objective(self, X, y, lmbd):
         self.lmbd = lmbd
-        
+
         self.X = torch.tensor(X)
-        self.y = torch.tensor((y>0), dtype=torch.float64)
+        self.y = torch.tensor(y > 0, dtype=torch.float64)
 
         # Not sure if this is useful here
         self.run(1)
@@ -34,7 +33,7 @@ class Solver(BaseSolver):
         X, y, solver = self.X, self.y, self.solver
         # Decide whether to solve a batch of problems
         n_points, n_features = X.shape
-        
+
         x0 = torch.zeros(1, n_features, requires_grad=True, dtype=X.dtype)
         if n_iter == 0:
             return x0
@@ -56,7 +55,7 @@ class Solver(BaseSolver):
             if self.line_search:
                 step = 'backtracking'
             else:
-                # this will estimate the step using backtracking line search once
+                # estimate the step using backtracking line search once
                 step = None
 
             result = chop.optim.minimize_pgd(logloss, x0,
