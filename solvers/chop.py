@@ -8,12 +8,6 @@ with safe_import_context() as import_ctx:
     from torch.utils.data import DataLoader
     import chop
 
-<<<<<<< HEAD
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-=======
->>>>>>> 3eeaa2a6bd03dd6ad1b8994c96420848fc0cb999
 
 class Solver(BaseSolver):
     name = 'chop'
@@ -69,6 +63,7 @@ class Solver(BaseSolver):
         elif 'CUDA_VISIBLE_DEVICES' in os.environ:
             del os.environ["CUDA_VISIBLE_DEVICES"]
 
+        device = torch.device(self.device)
         self.X = torch.tensor(X).to(device)
         self.y = torch.tensor(y > 0, dtype=torch.float64).to(device)
 
@@ -77,7 +72,7 @@ class Solver(BaseSolver):
 
         n_points, n_features = X.shape
 
-        x0 = torch.zeros(n_features, dtype=X.dtype, device=device)
+        x0 = torch.zeros(n_features, dtype=X.dtype, device=X.device)
         if n_iter == 0:
             self.beta = x0
             return
