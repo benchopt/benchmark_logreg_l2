@@ -1,11 +1,10 @@
 import warnings
+import os
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
     import torch
     import chop
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class Solver(BaseSolver):
@@ -15,19 +14,24 @@ class Solver(BaseSolver):
     requirements = ['pip:https://github.com/openopt/chop/archive/master.zip']
 
     parameters = {'solver': ['pgd'],
-                  'line_search': [False, True]}
+                  'line_search': [False, True],
+                  'device': ['cuda', 'cpu']}
 
     def skip(self, X, y, lmbd):
+        if self.device == 'cuda' and not torch.cuda.is_available():
+            return True, "CUDA is not available."
         return False, None
 
     def set_objective(self, X, y, lmbd):
         self.lmbd = lmbd
 
+        if self.device == 'cpu':
+            os.environ["CUDA_VISIBLE_DEVICES"] = ""
+        elif 'CUDA_VISIBLE_DEVICES' in os.environ:
+            del os.environ["CUDA_VISIBLE_DEVICES"]
+
         self.X = torch.tensor(X)
         self.y = torch.tensor(y > 0, dtype=torch.float64)
-
-        # Not sure if this is useful here
-        self.run(1)
 
     def run(self, n_iter):
         X, y, solver = self.X, self.y, self.solver
@@ -36,13 +40,13 @@ class Solver(BaseSolver):
 
         x0 = torch.zeros(1, n_features, requires_grad=True, dtype=X.dtype)
         if n_iter == 0:
-            return x0
+            self.beta = x0
+            return
 
         criterion = torch.nn.BCEWithLogitsLoss()
 
         @chop.utils.closure
         def logloss(x):
-
             alpha = self.lmbd / X.size(0)
             out = chop.utils.bmv(X, x)
             loss = criterion(out, y)
