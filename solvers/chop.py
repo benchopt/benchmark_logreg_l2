@@ -1,11 +1,11 @@
 import warnings
 import os
 from benchopt import BaseSolver, safe_import_context
-from torch.utils.data.dataset import TensorDataset
 
 with safe_import_context() as import_ctx:
     import torch
     from torch.utils.data import DataLoader
+    from torch.utils.data.dataset import TensorDataset
     import chop
 
 
@@ -19,8 +19,8 @@ class Solver(BaseSolver):
         'solver': ['pgd'],
         'line_search': [False, True],
         'stochastic': [False, True],
-        'batch_size': [32, 128, 200, 'full'],
-        'normalization': ['none', 'L2', 'Linf', 'sign'],
+        'batch_size': [50, 200, 'full'],
+        'normalization': ['none', 'sign'],  # 'Linf', 'L2' are possible
         'momentum': [0., 0.9],
         'device': ['cuda', 'cpu']
         }
@@ -28,9 +28,6 @@ class Solver(BaseSolver):
     def skip(self, X, y, lmbd):
         if self.device == 'cuda' and not torch.cuda.is_available():
             return True, "CUDA is not available."
-
-        if not self.stochastic and self.batch_size != 'full':
-            return True, "We only run stochastic=False if batch_size=='full'."
 
         if self.stochastic:
             if self.batch_size == 'full':
@@ -43,14 +40,22 @@ class Solver(BaseSolver):
                     "stochastic optimizer."
                 return True, msg
 
-        else:
+            if self.device == 'cpu':
+                msg = "Stochastic optimizers are too slow on cpu."
+                return True, msg
+
+        else:  # Full batch methods
+            if self.batch_size != 'full':
+                return True, "We only run stochastic=False if "\
+                    "batch_size=='full'."
+
             if self.normalization != 'none':
                 msg = 'Normalizations are not used for full batch '\
                     'optimizers.'
                 return True, msg
 
             if self.momentum != 0.:
-                msg = 'Momentum has no impact on full batch optimizers.'
+                msg = 'Momentum is not used for full batch optimizers.'
                 return True, msg
 
         return False, None
