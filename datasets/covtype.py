@@ -11,13 +11,8 @@ class Dataset(BaseDataset):
     install_cmd = 'conda'
     requirements = ['pip:copt']
 
-    def __init__(self):
-        self.X, self.y = None, None
-
     def get_data(self):
-
-        if self.X is None:
-            self.X, self.y = fetch_covtype(return_X_y=True)
+        self.X, self.y = fetch_covtype(return_X_y=True)
 
         data = dict(X=self.X, y=self.y)
 
