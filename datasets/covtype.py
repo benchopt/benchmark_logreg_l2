@@ -2,8 +2,7 @@ from benchopt import BaseDataset, safe_import_context
 
 
 with safe_import_context() as import_ctx:
-    import numpy as np
-    from copt.datasets import load_covtype
+    from sklearn.datasets import fetch_covtype
 
 
 class Dataset(BaseDataset):
@@ -18,8 +17,7 @@ class Dataset(BaseDataset):
     def get_data(self):
 
         if self.X is None:
-            self.X, self.y = load_covtype()
-            self.X = np.array(self.X.todense())
+            self.X, self.y = fetch_covtype(return_X_y=True)
 
         data = dict(X=self.X, y=self.y)
 
