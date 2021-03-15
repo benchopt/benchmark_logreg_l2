@@ -2,6 +2,8 @@ import warnings
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
+    import scipy.sparse as ssp
+    import numpy as np
     import torch
     from torch.utils.data import DataLoader
     from torch.utils.data.dataset import TensorDataset
@@ -18,9 +20,8 @@ class Solver(BaseSolver):
         'solver': ['pgd'],
         'line_search': [False, True],
         'stochastic': [False, True],
-        'batch_size': [50, 200, 'full'],
-        'normalization': ['none', 'sign'],  # 'Linf', 'L2' are possible
-        'momentum': [0., 0.9],
+        'batch_size': ['full', 1],
+        'momentum': [0., 0.7],
         'device': ['cuda', 'cpu']
         }
 
@@ -48,11 +49,6 @@ class Solver(BaseSolver):
                 return True, "We only run stochastic=False if "\
                     "batch_size=='full'."
 
-            if self.normalization != 'none':
-                msg = 'Normalizations are not used for full batch '\
-                    'optimizers.'
-                return True, msg
-
             if self.momentum != 0.:
                 msg = 'Momentum is not used for full batch optimizers.'
                 return True, msg
@@ -63,6 +59,7 @@ class Solver(BaseSolver):
         self.lmbd = lmbd
 
         device = torch.device(self.device)
+
         self.X = torch.tensor(X).to(device)
         self.y = torch.tensor(y > 0, dtype=torch.float64).to(device)
 
@@ -81,8 +78,8 @@ class Solver(BaseSolver):
         x.requires_grad_(True)
 
         if self.solver == 'pgd':
-            optimizer = chop.stochastic.PGD([x], lr=.05, momentum=self.momentum,
-                                            normalization=self.normalization)
+            optimizer = chop.stochastic.PGD([x], lr=.05,
+                                            momentum=self.momentum)
 
         else:
             raise NotImplementedError
@@ -92,10 +89,27 @@ class Solver(BaseSolver):
 
         alpha = self.lmbd / self.X.size(0)
 
+        def loglossderiv(p, y):
+            z = p * y
+            if z > 18:
+                return -y * np.exp(-z)
+            if z < -18:
+                return -y
+            return -y / (1. + np.exp(z))
+
+        def optimal_step_size(t):
+            """From sklearn, from an idea by Leon Bottou"""
+            p = np.sqrt(1. / np.sqrt(alpha))
+            eta0 = p / max(1, loglossderiv(-p, 1))
+            t0 = 1. / (alpha * eta0)
+
+            return 1. / (alpha * (t0 + t - 1.))
+
         while counter < n_iter:
 
             for data, target in loader:
                 counter += 1
+                optimizer.lr = optimal_step_size(counter)
 
                 optimizer.zero_grad()
                 pred = data @ x
