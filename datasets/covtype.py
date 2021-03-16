@@ -9,7 +9,7 @@ class Dataset(BaseDataset):
     name = "covtype"
 
     install_cmd = 'conda'
-    requirements = ['pip:copt']
+    requirements = ['pip:scikit-learn']
 
     def get_data(self):
         self.X, self.y = fetch_covtype(return_X_y=True)
