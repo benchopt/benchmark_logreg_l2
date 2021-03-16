@@ -2,7 +2,6 @@ import warnings
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
-    import scipy.sparse as ssp
     import numpy as np
     import torch
     from torch.utils.data import DataLoader
@@ -65,7 +64,9 @@ class Solver(BaseSolver):
 
         _, n_features = X.shape
 
-        self.x0 = torch.zeros(n_features, dtype=self.X.dtype, device=self.X.device)
+        self.x0 = torch.zeros(n_features,
+                              dtype=self.X.dtype,
+                              device=self.X.device)
         self.criterion = torch.nn.BCEWithLogitsLoss()
 
     def run_stochastic(self, n_iter):
