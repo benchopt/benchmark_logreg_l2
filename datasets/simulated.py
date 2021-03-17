@@ -1,6 +1,8 @@
-import numpy as np
+from benchopt import BaseDataset, safe_import_context
 
-from benchopt import BaseDataset
+
+with safe_import_context() as import_ctx:
+    import numpy as np
 
 
 class Dataset(BaseDataset):
