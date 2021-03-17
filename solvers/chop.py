@@ -21,7 +21,7 @@ class Solver(BaseSolver):
         'stochastic': [False, True],
         'batch_size': ['full', 1],
         'momentum': [0., 0.7],
-        'device': ['cuda', 'cpu']
+        'device': ['cpu', 'cuda']
         }
 
     def skip(self, X, y, lmbd):
