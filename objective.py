@@ -18,6 +18,8 @@ class Objective(BaseObjective):
 
     def set_data(self, X, y):
         self.X, self.y = X, y
+        msg = "Logistic loss is implemented with y in [-1, 1]"
+        assert set(self.y) == {-1, 1}, msg
 
     def compute(self, beta):
         y_X_beta = self.y * self.X.dot(beta.flatten())
