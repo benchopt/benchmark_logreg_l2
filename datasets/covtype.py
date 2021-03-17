@@ -6,14 +6,14 @@ with safe_import_context() as import_ctx:
 
 
 class Dataset(BaseDataset):
-    name = "covtype"
+    name = "covtype_binary"
 
     install_cmd = 'conda'
     requirements = ['pip:scikit-learn']
 
     def get_data(self):
-        self.X, self.y = fetch_covtype(return_X_y=True)
-
-        data = dict(X=self.X, y=self.y)
-
-        return self.X.shape[1], data
+        X, y = fetch_covtype(return_X_y=True)
+        y[y != 2] = -1
+        y[y == 2] = 1  # try to separate class 2 from the other 6 classes.
+        data = dict(X=X, y=y)
+        return X.shape[1], data

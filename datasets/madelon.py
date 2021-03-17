@@ -13,9 +13,11 @@ class Dataset(BaseDataset):
     requirements = ['pip:scikit-learn']
 
     def get_data(self):
-        self.X, self.y = fetch_openml("madelon", return_X_y=True)
-        # X, y are pandas DataFrames and y is stored as "1", "2"
-        self.X, self.y = np.array(self.X), np.array(self.y.astype(int)) - 1
-        data = dict(X=self.X, y=self.y)
+        X, y = fetch_openml("madelon", return_X_y=True, as_frame=False)
+        # y is stored as "1", "2" and needs to be moved to [-1, 1]
+        y = y.astype(int)
+        y[y == 1] = -1
+        y[y == 2] = 1
+        data = dict(X=X, y=y)
 
-        return self.X.shape[1], data
+        return X.shape[1], data
