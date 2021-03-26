@@ -7,20 +7,22 @@ with safe_import_context() as import_ctx:
     from torch.utils.data import DataLoader
     from torch.utils.data.dataset import TensorDataset
     import chop
+    from sklearn.preprocessing import StandardScaler
 
 
 class Solver(BaseSolver):
     name = 'chop'
 
     install_cmd = 'conda'
-    requirements = ['pip:https://github.com/openopt/chop/archive/master.zip']
+    requirements = ['pip:https://github.com/openopt/chop/archive/master.zip',
+                    'pip:scikit-learn']
 
     parameters = {
         'solver': ['pgd'],
-        'line_search': [False, True],
+        'line_search': [True, False],
         'stochastic': [False, True],
         'batch_size': ['full', 1],
-        'momentum': [0., 0.7],
+        'momentum': [0., 0.9],
         'device': ['cpu', 'cuda']
         }
 
@@ -59,8 +61,11 @@ class Solver(BaseSolver):
 
         device = torch.device(self.device)
 
-        self.X = torch.tensor(X).to(device)
-        self.y = torch.tensor(y > 0, dtype=torch.float64).to(device)
+        scaler = StandardScaler()
+        X = scaler.fit_transform(X)
+
+        self.X = torch.tensor(X, dtype=torch.float32, device=device)
+        self.y = torch.tensor(y, dtype=torch.float32, device=device)
 
         _, n_features = X.shape
 
@@ -69,10 +74,12 @@ class Solver(BaseSolver):
                               device=self.X.device)
         self.criterion = torch.nn.BCEWithLogitsLoss()
 
+        # prepare loader for stochastic methods
+        if self.stochastic:
+            dataset = TensorDataset(self.X, self.y)
+            self.loader = DataLoader(dataset, batch_size=self.batch_size)
+
     def run_stochastic(self, n_iter):
-        # prepare dataset
-        dataset = TensorDataset(self.X, self.y)
-        loader = DataLoader(dataset, batch_size=self.batch_size)
 
         # prepare opt variable
         x = self.x0.clone().detach().flatten()
@@ -108,7 +115,7 @@ class Solver(BaseSolver):
 
         while counter < n_iter:
 
-            for data, target in loader:
+            for data, target in self.loader:
                 counter += 1
                 optimizer.lr = optimal_step_size(counter)
 
@@ -130,12 +137,10 @@ class Solver(BaseSolver):
 
         @chop.utils.closure
         def logloss(x):
-
-            alpha = self.lmbd / self.X.size(0)
-            out = chop.utils.bmv(self.X, x)
-            loss = self.criterion(out, self.y)
-            reg = .5 * alpha * (x ** 2).sum()
-            return loss + reg
+            y_X_x = self.y * (self.X @ x.flatten())
+            l2 = 0.5 * x.pow(2).sum()
+            loss = torch.log1p(torch.exp(-y_X_x)).sum() + self.lmbd * l2
+            return loss
 
         # Solve the problem
         if self.solver == 'pgd':
@@ -146,7 +151,6 @@ class Solver(BaseSolver):
                 step = None
 
             result = chop.optim.minimize_pgd(logloss, x0,
-                                             prox=lambda x, s=None: x,
                                              step=step,
                                              max_iter=n_iter)
 
