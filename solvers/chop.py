@@ -19,7 +19,7 @@ class Solver(BaseSolver):
     parameters = {
         'solver': ['pgd'],
         'line_search': [True, False],
-        'stochastic': [False, True],
+        'stochastic': [False, ],
         'batch_size': ['full', 1],
         'momentum': [0., 0.9],
         'device': ['cpu', 'cuda']
@@ -75,7 +75,7 @@ class Solver(BaseSolver):
             self.loader = DataLoader(dataset, batch_size=self.batch_size)
 
         def logloss(x, data=self.X, target=self.y):
-            y_X_x = target * data @ x.flatten()
+            y_X_x = target * (data @ x.flatten())
             l2 = 0.5 * x.pow(2).sum()
             loss = torch.log1p(torch.exp(-y_X_x)).sum() + self.lmbd * l2
             return loss
