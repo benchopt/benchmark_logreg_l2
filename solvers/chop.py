@@ -7,7 +7,6 @@ with safe_import_context() as import_ctx:
     from torch.utils.data import DataLoader
     from torch.utils.data.dataset import TensorDataset
     import chop
-    from sklearn.preprocessing import StandardScaler
 
 
 class Solver(BaseSolver):
@@ -24,7 +23,7 @@ class Solver(BaseSolver):
         'batch_size': ['full', 1],
         'momentum': [0., 0.9],
         'device': ['cpu', 'cuda']
-        }
+    }
 
     def skip(self, X, y, lmbd):
         if self.device == 'cuda' and not torch.cuda.is_available():
@@ -60,9 +59,6 @@ class Solver(BaseSolver):
         self.lmbd = lmbd
 
         device = torch.device(self.device)
-
-        scaler = StandardScaler()
-        X = scaler.fit_transform(X)
 
         self.X = torch.tensor(X, dtype=torch.float32, device=device)
         self.y = torch.tensor(y, dtype=torch.float32, device=device)
