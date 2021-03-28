@@ -19,7 +19,7 @@ class Solver(BaseSolver):
     parameters = {
         'solver': ['pgd'],
         'line_search': [True, False],
-        'stochastic': [True],
+        'stochastic': [False, True],
         'batch_size': ['full', 1],
         'momentum': [0., 0.9],
         'device': ['cpu', 'cuda']
