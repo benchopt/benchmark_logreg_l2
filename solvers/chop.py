@@ -19,7 +19,7 @@ class Solver(BaseSolver):
     parameters = {
         'solver': ['pgd'],
         'line_search': [True, False],
-        'stochastic': [False, True],
+        'stochastic': [True],
         'batch_size': ['full', 1],
         'momentum': [0., 0.9],
         'device': ['cpu', 'cuda']
@@ -68,17 +68,24 @@ class Solver(BaseSolver):
         self.x0 = torch.zeros(n_features,
                               dtype=self.X.dtype,
                               device=self.X.device)
-        self.criterion = torch.nn.BCEWithLogitsLoss()
 
         # prepare loader for stochastic methods
         if self.stochastic:
             dataset = TensorDataset(self.X, self.y)
             self.loader = DataLoader(dataset, batch_size=self.batch_size)
 
+        def logloss(x, data=self.X, target=self.y):
+            y_X_x = target * data @ x.flatten()
+            l2 = 0.5 * x.pow(2).sum()
+            loss = torch.log1p(torch.exp(-y_X_x)).sum() + self.lmbd * l2
+            return loss
+
+        self.objective = logloss
+
     def run_stochastic(self, n_iter):
 
         # prepare opt variable
-        x = self.x0.clone().detach().flatten()
+        x = self.x0.clone().detach()
         x.requires_grad_(True)
 
         if self.solver == 'pgd':
@@ -89,7 +96,6 @@ class Solver(BaseSolver):
             raise NotImplementedError
 
         # Optimization loop
-        counter = 0
 
         alpha = self.lmbd / self.X.size(0)
 
@@ -101,24 +107,29 @@ class Solver(BaseSolver):
                 return -y
             return -y / (1. + np.exp(z))
 
-        def optimal_step_size(t):
-            """From sklearn, from an idea by Leon Bottou"""
+        def initial_step_size():
             p = np.sqrt(1. / np.sqrt(alpha))
             eta0 = p / max(1, loglossderiv(-p, 1))
             t0 = 1. / (alpha * eta0)
+            return t0
 
+        t0 = initial_step_size()
+
+        def optimal_step_size(t):
+            """From sklearn, from an idea by Leon Bottou"""
             return 1. / (alpha * (t0 + t - 1.))
 
-        while counter < n_iter:
-
+        counter = 0
+        stop = False
+        while not stop:
             for data, target in self.loader:
                 counter += 1
+                if counter == n_iter:
+                    stop = True
+                    break
                 optimizer.lr = optimal_step_size(counter)
-
                 optimizer.zero_grad()
-                pred = data @ x
-                loss = self.criterion(pred, target)
-                loss += .5 * alpha * (x ** 2).sum()
+                loss = self.objective(x, data=data, target=target)
                 loss.backward()
                 optimizer.step()
 
@@ -126,17 +137,13 @@ class Solver(BaseSolver):
 
     def run_full_batch(self, n_iter):
         # Set up the problem
+        @chop.utils.closure
+        def objective(x):
+            return self.objective(x, data=self.X, target=self.y)
 
         # chop's full batch optimizers require
         # (batch_size, *shape) shape
         x0 = self.x0.reshape(1, -1)
-
-        @chop.utils.closure
-        def logloss(x):
-            y_X_x = self.y * (self.X @ x.flatten())
-            l2 = 0.5 * x.pow(2).sum()
-            loss = torch.log1p(torch.exp(-y_X_x)).sum() + self.lmbd * l2
-            return loss
 
         # Solve the problem
         if self.solver == 'pgd':
@@ -146,7 +153,7 @@ class Solver(BaseSolver):
                 # estimate the step using backtracking line search once
                 step = None
 
-            result = chop.optim.minimize_pgd(logloss, x0,
+            result = chop.optim.minimize_pgd(objective, x0,
                                              step=step,
                                              max_iter=n_iter)
 
