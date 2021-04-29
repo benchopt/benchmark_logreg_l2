@@ -71,7 +71,9 @@ class Solver(BaseSolver):
                 L, n_iter, self.newton_step
             )
         else:
-            self.w = self.cd(self.X, self.y, self.lmbd, L, n_iter, self.newton_step)
+            self.w = self.cd(
+                self.X, self.y, self.lmbd, L, n_iter, self.newton_step
+            )
 
     @staticmethod
     @njit
@@ -99,7 +101,8 @@ class Solver(BaseSolver):
 
     @staticmethod
     @njit
-    def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, L, n_iter, newton_step):
+    def sparse_cd(X_data, X_indices, X_indptr, y, lmbd, L, n_iter,
+                  newton_step):
         n_features = len(X_indptr) - 1
         Xw = np.zeros_like(y)
         exp_yXw = np.zeros_like(y)
