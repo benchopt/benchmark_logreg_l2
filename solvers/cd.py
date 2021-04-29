@@ -56,7 +56,7 @@ class Solver(BaseSolver):
 
     def _get_lipschitz_csts(self):
         if sparse.issparse(self.X):
-            L = sparse.linalg.norm(X, axis=0)**2 / 4
+            L = sparse.linalg.norm(self.X, axis=0)**2 / 4
         else:
             L = (self.X ** 2).sum(axis=0) / 4
         L += self.lmbd
