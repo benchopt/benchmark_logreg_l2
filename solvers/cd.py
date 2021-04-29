@@ -18,7 +18,7 @@ if import_ctx.failed_import:
 def _newton_step_size(X, exp_yXw, j, lmbd):
     hess_jj = 0.
     for i in range(len(X)):
-        hess_jj += X[i, j]**2 * exp_yXw[i] / (1 + exp_yXw[i]**2)
+        hess_jj += X[i, j]**2 * exp_yXw[i] / (1 + exp_yXw[i])**2
     return 1 / (hess_jj + lmbd)
 
 
@@ -28,7 +28,7 @@ def _newton_step_size_sparse(X_data, X_indices, X_indptr, exp_yXw, j, lmbd):
     hess_jj = 0.
     for ind in range(start, end):
         i = X_indices[ind]
-        hess_jj += X_data[ind]**2 * exp_yXw[i] / (1 + exp_yXw[i]**2)
+        hess_jj += X_data[ind]**2 * exp_yXw[i] / (1 + exp_yXw[i])**2
     return 1 / (hess_jj + lmbd)
 
 
@@ -56,11 +56,10 @@ class Solver(BaseSolver):
 
     def _get_lipschitz_csts(self):
         if sparse.issparse(self.X):
-            L = np.array((self.X.multiply(self.X)).sum(axis=0)).squeeze() / 4
-            L += self.lmbd
+            L = sparse.linalg.norm(X, axis=0)**2 / 4
         else:
             L = (self.X ** 2).sum(axis=0) / 4
-            L += self.lmbd
+        L += self.lmbd
         return L
 
     def run(self, n_iter):
