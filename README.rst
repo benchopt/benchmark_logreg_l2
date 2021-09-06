@@ -37,7 +37,7 @@ Apart from the problem, options can be passed to `benchopt run`, to restrict the
 
 Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.
 
-.. |Build Status| image:: https://github.com/benchopt/benchmark_logreg_l2/workflows/build/badge.svg
+.. |Build Status| image:: https://github.com/benchopt/benchmark_logreg_l2/workflows/Tests/badge.svg
    :target: https://github.com/benchopt/benchmark_logreg_l2/actions
 .. |Python 3.6+| image:: https://img.shields.io/badge/python-3.6%2B-blue
    :target: https://www.python.org/downloads/release/python-360/
