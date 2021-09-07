@@ -2,21 +2,17 @@ from benchopt import BaseDataset, safe_import_context
 
 
 with safe_import_context() as import_ctx:
-    from sklearn.datasets import fetch_openml
+    from libsvmdata import fetch_libsvm
 
 
 class Dataset(BaseDataset):
     name = "madelon"
 
     install_cmd = 'conda'
-    requirements = ['pip:scikit-learn']
+    requirements = ['pip:libsvmdata']
 
     def get_data(self):
-        X, y = fetch_openml("madelon", return_X_y=True, as_frame=False)
-        # y is stored as "1", "2" and needs to be moved to [-1, 1]
-        y = y.astype(int)
-        y[y == 1] = -1
-        y[y == 2] = 1
-        data = dict(X=X, y=y)
-
+        X, y = fetch_libsvm("madelon")
+        X_test, y_test = fetch_libsvm("madelon_test")
+        data = dict(X=X, y=y, X_test=X_test, y_test=y_test)
         return X.shape[1], data
