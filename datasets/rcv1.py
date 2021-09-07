@@ -20,7 +20,9 @@ class Dataset(BaseDataset):
 
         if self.X is None:
             self.X, self.y = fetch_libsvm('rcv1.binary', min_nnz=0)
-            self.X_test, self.y_test = fetch_libsvm('rcv1.binary_test', min_nnz=0)
+            self.X_test, self.y_test = fetch_libsvm(
+                'rcv1.binary_test', min_nnz=0
+            )
 
         data = dict(X=self.X, y=self.y, X_test=self.X_test, y_test=self.y_test)
 
