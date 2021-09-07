@@ -32,7 +32,9 @@ class Objective(BaseObjective):
         train_loss = _compute_loss(self.X, self.y, self.lmbd, beta)
         test_loss = None
         if self.X_test is not None:
-            test_loss = _compute_loss(self.X_test, self.y_test, self.lmbd, beta)
+            test_loss = _compute_loss(
+                self.X_test, self.y_test, self.lmbd, beta
+            )
         return dict(objective_value=train_loss, test_loss=test_loss)
 
     def to_dict(self):
