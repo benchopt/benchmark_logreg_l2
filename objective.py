@@ -35,7 +35,7 @@ class Objective(BaseObjective):
             test_loss = _compute_loss(
                 self.X_test, self.y_test, self.lmbd, beta
             )
-        return dict(objective_value=train_loss, test_loss=test_loss)
+        return {"value": train_loss, "Test loss": test_loss}
 
     def to_dict(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd)
