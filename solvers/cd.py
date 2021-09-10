@@ -78,7 +78,7 @@ class Solver(BaseSolver):
     @njit
     def cd(X, y, lmbd, L, n_iter, newton_step):
         n_samples, n_features = X.shape
-        Xw = np.zeros_like(y)
+        Xw = np.zeros(y.shape, dtype=X.dtype)
         w = np.zeros(n_features)
         for _ in range(n_iter):
             for j in range(n_features):
