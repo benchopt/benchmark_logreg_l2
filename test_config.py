@@ -10,4 +10,5 @@ def check_test_solver_install(solver_class):
     particular architecture, call pytest.xfail when
     detecting the situation.
     """
-    pass
+    if solver_class.name.lower() == "cuml" and sys.platform == "darwin":
+        pytest.xfail("Cuml is not supported on MacOS.")
