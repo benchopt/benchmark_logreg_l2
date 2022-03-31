@@ -1,7 +1,14 @@
 from benchopt import BaseSolver, safe_import_context
 from benchopt.utils.sys_info import _get_cuda_version
 
+cuda_version = _get_cuda_version()
+if cuda_version is not None:
+    cuda_version = cuda_version.split("cuda_", 1)[1][:4]
+
 with safe_import_context() as import_ctx:
+    if cuda_version is None:
+        raise ImportError("cuml solver needs a nvidia GPU.")
+
     import cudf
     import numpy as np
     from cuml.linear_model import LogisticRegression
@@ -10,15 +17,12 @@ with safe_import_context() as import_ctx:
 class Solver(BaseSolver):
     name = "cuml"
 
-    cuda_version = _get_cuda_version()
-    if cuda_version is not None:
-        install_cmd = "conda"
-        cuda_version = cuda_version.split("cuda_", 1)[1][:4]
-        requirements = [
-            "rapidsai::rapids",
-            f"nvidia::cudatoolkit={cuda_version}",
-            "dask-sql",
-        ]
+    install_cmd = "conda"
+    requirements = [
+        "rapidsai::rapids",
+        f"nvidia::cudatoolkit={cuda_version}",
+        "dask-sql",
+    ] if cuda_version is not None else []
 
     parameters = {
         "solver": [
