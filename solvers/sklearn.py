@@ -30,8 +30,8 @@ class Solver(BaseSolver):
     parameter_template = "{solver}"
 
     def skip(self, X, y, lmbd):
-        if self.solver == "sgd" and X.shape[0] < 1000:
-            return True, "Not enough samples for SGD"
+        if self.solver in ["sgd", "sag", "saga"] and X.shape[0] < 1000:
+            return True, f"Not enough samples for {self.solver.upper()}"
         return False, None
 
     def set_objective(self, X, y, lmbd):
