@@ -29,8 +29,8 @@ class Solver(BaseSolver):
 
     def set_objective(self, X, y, lmbd):
         self.X, self.y, self.lmbd = X, y, lmbd
-        self.X = cudf.DataFrame(self.X.astype(np.float64))
-        self.y = cudf.Series((self.y > 0).astype(np.float64))
+        self.X = cudf.DataFrame(self.X.astype(np.float32))
+        self.y = cudf.Series((self.y > 0).astype(np.float32))
 
         self.clf = LogisticRegression(
             fit_intercept=False,
