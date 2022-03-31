@@ -29,11 +29,6 @@ class Solver(BaseSolver):
     }
     parameter_template = "{solver}"
 
-    def skip(self, X, y, lmbd):
-        if self.solver == "sgd" and X.shape[0] < 1000:
-            return True, "Not enough samples for SGD"
-        return False, None
-
     def set_objective(self, X, y, lmbd):
         self.X, self.y, self.lmbd = X, y, lmbd
 
