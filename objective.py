@@ -14,13 +14,11 @@ class Objective(BaseObjective):
     name = "L2 Logistic Regression"
 
     parameters = {
-        'fit_intercept': [False],
         'lmbd': [1., 0.01]
     }
 
-    def __init__(self, lmbd=.1, fit_intercept=False):
+    def __init__(self, lmbd=.1):
         self.lmbd = lmbd
-        self.fit_intercept = fit_intercept
 
     def set_data(self, X, y, X_test=None, y_test=None):
         self.X, self.y = X, y
