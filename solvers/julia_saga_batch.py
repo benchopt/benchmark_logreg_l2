@@ -22,11 +22,10 @@ class Solver(JuliaSolver):
         'https://github.com/gowerrobert/StochOpt.jl'
     ]
 
-    def set_requirements(self):
-        # List of dependencies can be found on the package github
-        self.julia_requirements = [
-            'https://github.com/tbng/StochOpt.jl',
-        ]
+    # List of dependencies can be found on the package github
+    julia_requirements = [
+        'StochOpt::https://github.com/tommoral/StochOpt.jl#FIX_proper_module_install',  # noqa: E501
+    ]
 
     def skip(self, X, y, lmbd, fit_intercept):
         # fit intercept is not yet implemented in StochOpt.jl
