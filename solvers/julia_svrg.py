@@ -23,11 +23,10 @@ class Solver(JuliaSolver):
         'https://github.com/gowerrobert/StochOpt.jl'
     ]
 
-    def set_requirements(self):
-        # List of dependencies can be found on the package github
-        self.julia_requirements = [
-            'https://github.com/tbng/StochOpt.jl',
-        ]
+    # List of dependencies can be found on the package github
+    julia_requirements = [
+        'StochOpt::https://github.com/tommoral/StochOpt.jl#FIX_proper_module_install',  # noqa: E501
+    ]
 
     def set_objective(self, X, y, lmbd):
 
@@ -36,7 +35,8 @@ class Solver(JuliaSolver):
         self.solve_logreg_l2 = jl.include(JULIA_SOLVER_FILE)
 
     def run(self, n_iter):
-        self.beta = self.solve_logreg_l2(self.X.transpose(), self.y, self.lmbd, n_iter)[1:]
+        self.beta = self.solve_logreg_l2(
+            self.X.transpose(), self.y, self.lmbd, n_iter)[1:]
 
     def get_result(self):
         return self.beta.ravel()
