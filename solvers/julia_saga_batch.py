@@ -9,14 +9,14 @@ with safe_import_context() as import_ctx:
 
 
 # File containing the function to be called from julia
-JULIA_SOLVER_FILE = 'julia_saga_batch.jl'
+JULIA_SOLVER_FILE = "solvers/julia_stochopt.jl"
 
 
 class Solver(JuliaSolver):
 
-    name = 'Julia-SAGA-Batch'
+    name = 'julia-saga-batch'
     references = [
-        'Gazagnadou, Nidham, Robert Gower, and Joseph Salmon,'
+        'Gazagnadou, Gower, and Salmon,'
         ' "Optimal mini-batch and step sizes for SAGA." '
         'International conference on machine learning. PMLR, 2019.'
         'https://github.com/gowerrobert/StochOpt.jl'
@@ -27,23 +27,17 @@ class Solver(JuliaSolver):
         'StochOpt::https://github.com/tommoral/StochOpt.jl#FIX_proper_module_install',  # noqa: E501
     ]
 
-    def skip(self, X, y, lmbd, fit_intercept):
-        # fit intercept is not yet implemented in StochOpt.jl
-        if fit_intercept:
-            return True, f"{self.name} does not handle fit_intercept"
+    def set_objective(self, X, y, lmbd):
 
-        return False, None
-
-    def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd
-        self.fit_intercept = fit_intercept
-
         jl = get_jl_interpreter()
-        self.solve_logreg_l2 = jl.include(JULIA_SOLVER_FILE)
+        jl.include(JULIA_SOLVER_FILE)
+        self.solve_logreg_saga_batch = jl.solve_logreg_saga_batch
 
     def run(self, n_iter):
-        self.beta = self.solve_lasso(self.X, self.y, self.lmbd, n_iter)
+        self.beta = self.solve_logreg_saga_batch(
+            self.X.T, self.y, self.lmbd, n_iter
+        )[1:]
 
     def get_result(self):
         return self.beta.ravel()
-

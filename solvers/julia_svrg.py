@@ -10,14 +10,14 @@ with safe_import_context() as import_ctx:
 
 
 # File containing the function to be called from julia
-JULIA_SOLVER_FILE = str(Path(__file__).with_suffix('.jl'))
+JULIA_SOLVER_FILE = 'solvers/julia_stochopt.jl'
 
 
 class Solver(JuliaSolver):
 
     name = 'julia-svrg'
     references = [
-        'Gazagnadou, Nidham, Robert Gower, and Joseph Salmon,'
+        'Gazagnadou, Gower, and Salmon,'
         ' "Optimal mini-batch and step sizes for SAGA." '
         'International conference on machine learning. PMLR, 2019.'
         'https://github.com/gowerrobert/StochOpt.jl'
@@ -32,11 +32,13 @@ class Solver(JuliaSolver):
 
         self.X, self.y, self.lmbd = X, y, lmbd
         jl = get_jl_interpreter()
-        self.solve_logreg_l2 = jl.include(JULIA_SOLVER_FILE)
+        jl.include(JULIA_SOLVER_FILE)
+        self.solve_logreg_svrg = jl.solve_logreg_svrg
 
     def run(self, n_iter):
-        self.beta = self.solve_logreg_l2(
-            self.X.transpose(), self.y, self.lmbd, n_iter)[1:]
+        self.beta = self.solve_logreg_svrg(
+            self.X.T, self.y, self.lmbd, n_iter
+        )[1:]
 
     def get_result(self):
         return self.beta.ravel()
