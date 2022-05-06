@@ -15,5 +15,4 @@ class Dataset(BaseDataset):
         X, y = fetch_covtype(return_X_y=True)
         y[y != 2] = -1
         y[y == 2] = 1  # try to separate class 2 from the other 6 classes.
-        data = dict(X=X, y=y)
-        return X.shape[1], data
+        return dict(X=X, y=y)

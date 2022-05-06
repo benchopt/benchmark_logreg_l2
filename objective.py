@@ -1,7 +1,7 @@
-import numpy as np
+from benchopt import BaseObjective, safe_import_context
 
-
-from benchopt import BaseObjective
+with safe_import_context() as ctx:
+    import numpy as np
 
 
 def _compute_loss(X, y, lmbd, beta):
@@ -25,6 +25,9 @@ class Objective(BaseObjective):
         self.X_test, self.y_test = X_test, y_test
         msg = "Logistic loss is implemented with y in [-1, 1]"
         assert set(self.y) == {-1, 1}, msg
+
+    def get_one_solution(self):
+        return np.zeros((self.X.shape[1]))
 
     def compute(self, beta):
         train_loss = _compute_loss(self.X, self.y, self.lmbd, beta)
