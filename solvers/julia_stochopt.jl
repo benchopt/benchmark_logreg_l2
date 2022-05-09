@@ -13,8 +13,9 @@ end
 
 
 function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
-                      method_name::AbstractString = "SVRG", batch_size::Int64 = 100)
-
+                      method_name::AbstractString = "SVRG", batch_size::Int64 = 100,
+                      numinneriters::Int64 = 1)
+        
     println("type X", typeof(X));
 
     # Set option for StochOpt solvers
@@ -37,8 +38,7 @@ function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
     prob = load_logistic_from_matrices(
         X, y, "benchopt", options, lambda=lambda, scaling="none"
     );
-
-
+  
     if method_name in ["SVRG_bubeck", "Free_SVRG", "Leap_SVRG", "L_SVRG_D"]
 
         # This gives the theoretical step size for convergence of the methods, which is not
@@ -48,14 +48,14 @@ function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
         # sampling strategy for the stochastic estimates
         sampling = StochOpt.build_sampling("nice", prob.numdata, options);
     end
-
-
+    
+    # numinneriters is the mini-batch size in the innerloop, check references
     @match method_name begin
         "SVRG_bubeck"   => (method = StochOpt.initiate_SVRG_bubeck(
             prob, options, sampling, numinneriters=-1
         ))
         "Free_SVRG"     => (method = StochOpt.initiate_Free_SVRG(
-            prob, options, sampling, numinneriters=prob.numdata, averaged_reference_point=true
+            prob, options, sampling, numinneriters=numinneriters, averaged_reference_point=true
         ))
         "Leap_SVRG"     => (method = StochOpt.initiate_Leap_SVRG(
             prob, options, sampling, 1/prob.numdata
