@@ -1,9 +1,21 @@
 using StochOpt
 using Match
+using PyCall, SparseArrays
+
+function scipyCSC_to_julia(A)
+    m, n = A.shape
+    colPtr = Int[i+1 for i in PyArray(A."indptr")]
+    rowVal = Int[i+1 for i in PyArray(A."indices")]
+    nzVal = Vector{Float64}(PyArray(A."data"))
+    B = SparseMatrixCSC{Float64,Int}(m, n, colPtr, rowVal, nzVal)
+    return B
+end
 
 
-function solve_logreg(X::Matrix{Float64}, y::Vector{Float64}, lambda::Float64,
-                      n_iter::Int64, method_name::AbstractString = "SVRG", batch_size::Int64 = 100)
+function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
+                      method_name::AbstractString = "SVRG", batch_size::Int64 = 100)
+
+    println("type X", typeof(X));
 
     # Set option for StochOpt solvers
     options = set_options(

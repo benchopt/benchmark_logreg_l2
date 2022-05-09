@@ -1,5 +1,6 @@
 from pathlib import Path
 from benchopt import safe_import_context
+from benchopt.stopping_criterion import SufficientProgressCriterion
 
 from benchopt.helpers.julia import JuliaSolver
 from benchopt.helpers.julia import get_jl_interpreter
@@ -7,6 +8,7 @@ from benchopt.helpers.julia import assert_julia_installed
 
 with safe_import_context() as import_ctx:
     assert_julia_installed()
+    from scipy import sparse
 
 
 # File containing the function to be called from julia
@@ -28,6 +30,7 @@ class Solver(JuliaSolver):
     # List of dependencies can be found on the package github
     julia_requirements = [
         'StochOpt::https://github.com/tommoral/StochOpt.jl#FIX_proper_module_install',  # noqa: E501
+        'PyCall',
     ]
 
     parameters = {
@@ -47,12 +50,23 @@ class Solver(JuliaSolver):
         'batch_size': [128]
     }
 
+    stopping_criterion = SufficientProgressCriterion(
+        strategy='iteration', patience=10
+    )
+
     def set_objective(self, X, y, lmbd):
 
         self.X, self.y, self.lmbd = X, y, lmbd
+
         jl = get_jl_interpreter()
         jl.include(str(JULIA_SOLVER_FILE))
         self.solve_logreg = jl.solve_logreg
+
+        if isinstance(X, sparse.csc_array):
+            scipyCSC_to_julia = jl.pyfunctionret(
+                jl.Main.scipyCSC_to_julia, jl.Any, jl.PyObject
+            )
+            self.X = scipyCSC_to_julia(X)
 
         # run iteration once to cache the JIT computation
         self.solve_logreg(
