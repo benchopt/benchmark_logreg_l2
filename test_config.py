@@ -1,6 +1,7 @@
 import sys  # noqa: F401
-from benchopt.utils.sys_info import _get_cuda_version
 import pytest  # noqa: F401
+
+from benchopt.utils.sys_info import _get_cuda_version
 
 
 def check_test_solver_install(solver_class):
@@ -16,7 +17,3 @@ def check_test_solver_install(solver_class):
             pytest.xfail("Cuml is not supported on MacOS.")
         if cuda_version is None:
             pytest.xfail("Cuml needs a working GPU hardware.")
-
-    if solver_class.name.lower() == "snapml[gpu=True]".lower():
-        if cuda_version is None:
-            pytest.skip("snapml[gpu=True] needs a GPU to run")
