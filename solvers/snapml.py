@@ -17,7 +17,7 @@ class Solver(BaseSolver):
 
     def skip(self, X, y, lmbd):
         if self.gpu and _get_cuda_version() is None:
-            return True, "snapml[gpu] needs a GPU to run"
+            return True, "snapml[gpu=True] needs a GPU to run"
         return False, None
 
     def set_objective(self, X, y, lmbd):
