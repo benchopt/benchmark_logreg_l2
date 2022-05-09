@@ -1,7 +1,7 @@
-import numpy as np
+from benchopt import BaseObjective, safe_import_context
 
-
-from benchopt import BaseObjective
+with safe_import_context() as ctx:
+    import numpy as np
 
 
 def _compute_loss(X, y, lmbd, beta):
@@ -28,6 +28,9 @@ class Objective(BaseObjective):
         assert len(np.unique(y)) == 2, msg
         y[y == y.max()] = 1
         y[y == y.min()] = -1
+
+    def get_one_solution(self):
+        return np.zeros((self.X.shape[1]))
 
     def compute(self, beta):
         train_loss = _compute_loss(self.X, self.y, self.lmbd, beta)
