@@ -28,7 +28,7 @@ class Solver(BaseSolver):
             regularizer=self.lmbd,
             penalty="l2",
             tol=1e-12,
-            use_gpu=self.use_gpu,
+            use_gpu=self.gpu,
             dual=self.X.shape[0] >= self.X.shape[1],
         )
 
