@@ -13,10 +13,8 @@ class Solver(BaseSolver):
     install_cmd = "conda"
     requirements = ["pip:snapml"]
 
-    parameters = {
-        'gpu': [True, Fase]
-    }
-    
+    parameters = {"gpu": [True, False]}
+
     def skip(self, X, y, lmbd):
         if self.gpu and _get_cuda_version() is None:
             return True, "snapml[gpu] needs a GPU to run"
@@ -31,7 +29,7 @@ class Solver(BaseSolver):
             penalty="l2",
             tol=1e-12,
             use_gpu=self.use_gpu,
-            dual=self.X.shape[0] >= self.X.shape[1]
+            dual=self.X.shape[0] >= self.X.shape[1],
         )
 
     def run(self, n_iter):
