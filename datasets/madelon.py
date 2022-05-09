@@ -14,5 +14,4 @@ class Dataset(BaseDataset):
     def get_data(self):
         X, y = fetch_libsvm("madelon")
         X_test, y_test = fetch_libsvm("madelon_test")
-        data = dict(X=X, y=y, X_test=X_test, y_test=y_test)
-        return X.shape[1], data
+        return dict(X=X, y=y, X_test=X_test, y_test=y_test)
