@@ -27,7 +27,7 @@ function solve_logreg(X::Matrix{Float64}, y::Vector{Float64}, lambda::Float64,
     );
 
 
-    if method_name in ["SVRG_bubeck", "Free_SVRG", "Leap_SVRG"]
+    if method_name in ["SVRG_bubeck", "Free_SVRG", "Leap_SVRG", "L_SVRG_D"]
 
         # This gives the theoretical step size for convergence of the methods, which is not
         # available for batchsize != 1
@@ -36,6 +36,7 @@ function solve_logreg(X::Matrix{Float64}, y::Vector{Float64}, lambda::Float64,
         # sampling strategy for the stochastic estimates
         sampling = StochOpt.build_sampling("nice", prob.numdata, options);
     end
+
 
     @match method_name begin
         "SVRG_bubeck"   => (method = StochOpt.initiate_SVRG_bubeck(

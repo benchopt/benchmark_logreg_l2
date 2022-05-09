@@ -20,6 +20,8 @@ class Solver(JuliaSolver):
         'Gazagnadou, Gower, and Salmon,'
         ' "Optimal mini-batch and step sizes for SAGA." '
         'International conference on machine learning. PMLR, 2019.'
+        'Sebbouh, O., et al.  Towards closing the gap between the theory and'
+        'practice of SVRG. Advances in Neural Information Processing Systems, 2019'
         'https://github.com/gowerrobert/StochOpt.jl'
     ]
 
@@ -30,8 +32,17 @@ class Solver(JuliaSolver):
 
     parameters = {
         'method': [
-            "SVRG", "BFGS", "AMgauss", "SAGA_nice", "SVRG_bubeck",
-            "Free_SVRG", "Leap_SVRG", "L_SVRG_D"
+            "SVRG",
+            "BFGS",
+            "AMgauss",  # A variant of SVRG that uses a embed Hessian matrix
+            "SAGA_nice",  # SAGA sampling with closed-form optimal mini-batch
+            "SVRG_bubeck",  
+            "Leap_SVRG",  # SVRG without outer loop but a coin tossing at each
+                          # iteration to decide whether the reference is
+                          # updated or not
+            "L_SVRG_D"  # Loopless-SVRG-Decreasing without outer loop but a
+                        # coin tossing at each iteration to decide whether te
+                        # reference is updated (with probability p) or not
         ],
         'batch_size': [128]
     }
