@@ -1,35 +1,62 @@
 using StochOpt
+using Match
 
 
-function solve_logreg_svrg(X, y, lambda, n_iter)
-    options = set_options(max_iter=n_iter, max_time=350.0, max_epocs=n_iter,
-                          exacterror=false, skip_error_calculation=n_iter+1,
-                          repeat_stepsize_calculation=true, rep_number=4,
-                          batchsize=100, embeddim=10, printiters=false);
+function solve_logreg(X::Matrix{Float64}, y::Vector{Float64}, lambda::Float64,
+                      n_iter::Int64, method_name::AbstractString = "SVRG", batch_size::Int64 = 100)
 
-    probname = "empty"  # just a placeholder for the load logistic func below
-    prob = load_logistic_from_matrices(X, y, probname, options, lambda=lambda);
+    # Set option for StochOpt solvers
+    options = set_options(
+        max_iter=n_iter,  # run n_iter epochs of the considered function
+        batchsize=batch_size,
+        embeddim=0,
+        printiters=false,
+        stepsize_multiplier=1.0,
+        exacterror=false,
+    );
+
+    # In StochOpt, the objective is a mean logistic loss compared to the sum in
+    # benchopt, so we need to divide lambda per the number of sample. We cannot
+    # use regularizor_parameter as this only work when lambda == -1.
+    n_samples = size(X, 2);
+    lambda /= n_samples;
+
+    # Load logistic problem with the given matrices
+    prob = load_logistic_from_matrices(
+        X, y, "benchopt", options, lambda=lambda, scaling="none"
+    );
+
+
+    if method_name in ["SVRG_bubeck", "Free_SVRG", "Leap_SVRG"]
+
+        # This gives the theoretical step size for convergence of the methods, which is not
+        # available for batchsize != 1
+        options.batchsize = 1;
+        options.stepsize_multiplier = -1.0;
+        # sampling strategy for the stochastic estimates
+        sampling = StochOpt.build_sampling("nice", prob.numdata, options);
+    end
+
+    @match method_name begin
+        "SVRG_bubeck"   => (method = StochOpt.initiate_SVRG_bubeck(
+            prob, options, sampling, numinneriters=-1
+        ))
+        "Free_SVRG"     => (method = StochOpt.initiate_Free_SVRG(
+            prob, options, sampling, numinneriters=prob.numdata, averaged_reference_point=true
+        ))
+        "Leap_SVRG"     => (method = StochOpt.initiate_Leap_SVRG(
+            prob, options, sampling, 1/prob.numdata
+        ))
+        "L_SVRG_D"      => (method = StochOpt.initiate_L_SVRG_D(
+            prob, options, sampling, 1/prob.numdata
+        ))
+        "SAGA_nice"     => (method = StochOpt.initiate_SAGA_nice(prob, options))
+        _               => (method = method_name)
+    end #
+
     prob.fsol = 0.0  # disable loading of the solution
-    output = minimizeFunc(prob, "SVRG", options);
+    return minimize_func(prob, method, options);
 
-    # return the fitted coefficients
-    return output.xfinal 
-
-end
-
-
-function solve_logreg_saga_batch(X, y, lambda, n_iter)
-    options = set_options(max_iter=n_iter, max_time=350.0, max_epocs=n_iter,
-                          repeat_stepsize_calculation=true, rep_number=4,
-                          batchsize=100, embeddim=10, printiters=false);
-
-    probname = "empty"  # just a placeholder for the load logistic func below
-    prob = load_logistic_from_matrices(X, y, probname, options, lambda=lambda);
-    prob.fsol = 0.0  # disable loading of the solution
-    output = minimizeFunc(prob, "SAGA_nice", options);
-
-    # return the fitted coefficients
-    return output.xfinal 
 end
 
 
@@ -46,14 +73,14 @@ function minimize_func(prob::Prob, method_input, options::MyOptions;)
     end
 
     if typeof(method_input) == String
-        method = boot_method(method_input, prob, options);
+        method = StochOpt.boot_method(method_input, prob, options);
         if method=="METHOD DOES NOT EXIST"
             println("FAIL: unknown method name:")
             return
         end
     else
-        method = method_input
-        method.bootmethod(prob, method, options)
+        method = method_input;
+        method.bootmethod(prob, method, options);
     end
 
     d = zeros(prob.numfeatures); # Search direction vector

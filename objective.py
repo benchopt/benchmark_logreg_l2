@@ -14,7 +14,7 @@ class Objective(BaseObjective):
     name = "L2 Logistic Regression"
 
     parameters = {
-        'lmbd': [1., 0.01]
+        'lmbd': [0.1, 0.001]
     }
 
     def __init__(self, lmbd=.1):
@@ -23,8 +23,11 @@ class Objective(BaseObjective):
     def set_data(self, X, y, X_test=None, y_test=None):
         self.X, self.y = X, y
         self.X_test, self.y_test = X_test, y_test
-        msg = "Logistic loss is implemented with y in [-1, 1]"
-        assert set(self.y) == {-1, 1}, msg
+
+        msg = "Logistic loss is implemented with binary y"
+        assert len(np.unique(y)) == 2, msg
+        y[y == y.max()] = 1
+        y[y == y.min()] = -1
 
     def compute(self, beta):
         train_loss = _compute_loss(self.X, self.y, self.lmbd, beta)
