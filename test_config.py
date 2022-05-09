@@ -17,6 +17,6 @@ def check_test_solver_install(solver_class):
         if cuda_version is None:
             pytest.xfail("Cuml needs a working GPU hardware.")
 
-    if solver_class.name.lower() == "snapml[gpu=True]":
+    if solver_class.name.lower() == "snapml[gpu=True]".lower():
         if cuda_version is None:
             pytest.skip("snapml[gpu=True] needs a GPU to run")
