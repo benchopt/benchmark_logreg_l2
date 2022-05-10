@@ -20,5 +20,6 @@ class Dataset(BaseDataset):
 
         if self.X is None:
             self.X, self.y = fetch_libsvm("ijcnn1")
-
+            # column scaling
+            self.X = (self.X - self.X.mean(0)) / self.X.std(0)
         return dict(X=self.X, y=self.y)

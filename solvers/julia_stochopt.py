@@ -36,17 +36,16 @@ class Solver(JuliaSolver):
     parameters = {
         'method': [
             "SVRG",
-            "Free_SVRG", # One of the main methods in [2]
+            "Free_SVRG", # SVRG with inner loop not averaged at any point [2]
             "BFGS",
             "AMgauss",  # A variant of SVRG that uses a embed Hessian matrix
             "SAGA_nice",  # SAGA sampling with closed-form optimal mini-batch [1]
-            # "SVRG_bubeck",
-            "Leap_SVRG",  # SVRG without outer loop but a coin tossing at each
-                          # iteration to decide whether the reference is
-                          # updated or not [2]
-            "L_SVRG_D"  # Loopless-SVRG-Decreasing without outer loop but a
-                        # coin tossing at each iteration to decide whether te
-                        # reference is updated (with probability p) or not [2]
+            "SVRG_bubeck",
+            "Leap_SVRG",  # SVRG without outer loop [2]
+            "L_SVRG_D",  # Loopless-SVRG-Decreasing [2]
+            "Free_SVRG_2n",
+            "Free_SVRG_lmax",
+            "Free_SVRG_mstar",
         ],
         'batch_size': [
             1,  # to allow calculation of theoretical step size to some methods

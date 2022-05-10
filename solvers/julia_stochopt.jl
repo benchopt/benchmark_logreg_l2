@@ -39,7 +39,8 @@ function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
         X, y, "benchopt", options, lambda=lambda, scaling="none"
     );
   
-    if method_name in ["SVRG_bubeck", "Free_SVRG", "Leap_SVRG", "L_SVRG_D"]
+    if method_name in ["SVRG_bubeck", "Free_SVRG", "Leap_SVRG", "L_SVRG_D",
+                       "Free_SVRG_2n", "Free_SVRG_lmax", "Free_SVRG_mstar"]
 
         # This gives the theoretical step size for convergence of the methods, which is not
         # available for batchsize != 1
@@ -48,6 +49,17 @@ function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
         # sampling strategy for the stochastic estimates
         sampling = StochOpt.build_sampling("nice", prob.numdata, options);
     end
+
+    n = prob.numdata
+    d = prob.numfeatures
+    mu = prob.mu
+    Lmax = prob.Lmax
+    L = prob.L
+
+    m_star = round(Int64, (3*Lmax)/mu) # theoretical optimal inner loop size for Free-SVRG with 1-nice sampling
+    m_star_inv = round(Int64, mu/(3*Lmax))
+    ## List of mini-batch sizes
+    numinneriters_list   = [n, 2*n, round(Int64, Lmax/mu), m_star]
     
     # numinneriters is the mini-batch size in the innerloop, check references
     @match method_name begin
@@ -55,13 +67,22 @@ function solve_logreg(X, y::Vector{Float64}, lambda::Float64, n_iter::Int64,
             prob, options, sampling, numinneriters=-1
         ))
         "Free_SVRG"     => (method = StochOpt.initiate_Free_SVRG(
-            prob, options, sampling, numinneriters=numinneriters, averaged_reference_point=true
+            prob, options, sampling, numinneriters=n, averaged_reference_point=true
         ))
+        "Free_SVRG_2n"     => (method = StochOpt.initiate_Free_SVRG(
+            prob, options, sampling, numinneriters=2*n, averaged_reference_point=true
+        ))
+        "Free_SVRG_lmax"     => (method = StochOpt.initiate_Free_SVRG(
+            prob, options, sampling, numinneriters=round(Int64, Lmax/mu), averaged_reference_point=true
+        ))
+        "Free_SVRG_mstar"     => (method = StochOpt.initiate_Free_SVRG(
+            prob, options, sampling, numinneriters=m_star, averaged_reference_point=true
+        ))                        
         "Leap_SVRG"     => (method = StochOpt.initiate_Leap_SVRG(
             prob, options, sampling, 1/prob.numdata
         ))
         "L_SVRG_D"      => (method = StochOpt.initiate_L_SVRG_D(
-            prob, options, sampling, 1/prob.numdata
+            prob, options, sampling, m_star_inv
         ))
         "SAGA_nice"     => (method = StochOpt.initiate_SAGA_nice(prob, options))
         _               => (method = method_name)
