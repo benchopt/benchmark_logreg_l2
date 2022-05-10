@@ -1,0 +1,8 @@
+objective-filter:
+  - L2 Logistic Regression[lmbd=0.1]
+dataset:
+  - simulated[n_features=500,n_samples=200]
+solver:
+  - lightning
+  - sklearn[liblinear,newton-cg]
+n-repetitions: 10
