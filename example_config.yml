@@ -6,3 +6,4 @@ solver:
   - lightning
   - sklearn[liblinear,newton-cg]
 n-repetitions: 10
+max-runs: 10
