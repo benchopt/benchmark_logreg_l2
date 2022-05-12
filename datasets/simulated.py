@@ -14,7 +14,8 @@ class Dataset(BaseDataset):
             (200, 500),
             (1000, 10),
             (100_000, 400),
-        ]
+        ],
+        'scaled': [True, False]
     }
 
     def __init__(self, n_samples=10, n_features=50, random_state=42):
@@ -31,6 +32,14 @@ class Dataset(BaseDataset):
 
         X_test = rng.randn(self.n_samples, self.n_features)
         y_test = np.sign(X_test @ beta)
+
+        if self.scaled:
+            # column scaling
+            mu, sigma = X.mean(axis=0), X.std(axis=0)
+            X -= mu
+            X /= sigma
+            X_test -= mu
+            X_test /= sigma
 
         data = dict(X=X, y=y, X_test=X_test, y_test=y_test)
 

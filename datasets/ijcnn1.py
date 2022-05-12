@@ -7,8 +7,7 @@ with safe_import_context() as import_ctx:
 
 
 class Dataset(BaseDataset):
-    name = "news20"
-    is_sparse = True
+    name = "ijcnn1"
 
     install_cmd = "conda"
     requirements = ["pip:libsvmdata"]
@@ -18,12 +17,15 @@ class Dataset(BaseDataset):
     }
 
     def get_data(self):
-
-        X, y = fetch_libsvm("news20.binary")
+        X, y = fetch_libsvm("ijcnn1")
+        X_test, y_test = fetch_libsvm('ijcnn1_test')
 
         if self.scaled:
             # column scaling
-            X -= X.mean(axis=0)
-            X /= X.std(axis=0)
+            mu, sigma = X.mean(axis=0), X.std(axis=0)
+            X -= mu
+            X /= sigma
+            X_test -= mu
+            X_test /= sigma
 
-        return dict(X=X, y=y)
+        return dict(X=X, y=y, X_test=X_test, y_test=y_test)
