@@ -13,7 +13,15 @@ class Solver(BaseSolver):
         'pip:git+https://github.com/scikit-learn-contrib/lightning.git'
     ]
 
-    def set_objective(self, X, y, lmbd):
+    def skip(self, X, y, lmbd, fit_intercept):
+        if fit_intercept:
+            return True, "no implemented with fit_intercept"
+
+        if self.method == "SVRG_bubeck" and self.batch_size != 0:
+            return True, "SVRG_bubeck is only available for batch_size=1."
+        return False, None
+
+    def set_objective(self, X, y, lmbd, fit_intercept):
 
         self.X, self.y, self.lmbd = X, y, lmbd
 

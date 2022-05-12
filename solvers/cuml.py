@@ -31,13 +31,13 @@ class Solver(BaseSolver):
     }
     parameter_template = "{solver}"
 
-    def set_objective(self, X, y, lmbd):
+    def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd
         self.X = cudf.DataFrame(self.X.astype(np.float32))
         self.y = cudf.Series((self.y > 0).astype(np.float32))
 
         self.clf = LogisticRegression(
-            fit_intercept=False,
+            fit_intercept=fit_intercept,
             C=1 / self.lmbd,
             penalty="l2",
             tol=1e-15,
@@ -50,4 +50,7 @@ class Solver(BaseSolver):
         self.clf.fit(self.X, self.y)
 
     def get_result(self):
-        return self.clf.coef_.to_numpy().flatten()
+        coef = self.clf.coef_.flatten().to_numpy()
+        if self.clf.fit_intercept:
+            coef = np.r_[coef, self.clf.intercept_.to_numpy()]
+        return coef

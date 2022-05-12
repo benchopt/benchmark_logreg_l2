@@ -1,12 +1,16 @@
 import warnings
 from benchopt import BaseSolver, safe_import_context
 
+devices = ['cpu']
 with safe_import_context() as import_ctx:
     import numpy as np
     import torch
     from torch.utils.data import DataLoader
     from torch.utils.data.dataset import TensorDataset
     import chop
+
+    if torch.cuda.is_available():
+        devices += ["cuda"]
 
 
 class Solver(BaseSolver):
@@ -21,10 +25,10 @@ class Solver(BaseSolver):
         'stochastic': [False, True],
         'batch_size': ['full', 1],
         'momentum': [0., 0.7],
-        'device': ['cpu', 'cuda']
-        }
+        'device': devices
+    }
 
-    def skip(self, X, y, lmbd):
+    def skip(self, X, y, lmbd, fit_intercept):
         if self.device == 'cuda' and not torch.cuda.is_available():
             return True, "CUDA is not available."
 
@@ -52,9 +56,12 @@ class Solver(BaseSolver):
                 msg = 'Momentum is not used for full batch optimizers.'
                 return True, msg
 
+        if fit_intercept:
+            return True, "not working with fit_intercept"
+
         return False, None
 
-    def set_objective(self, X, y, lmbd):
+    def set_objective(self, X, y, lmbd, fit_intercept):
         self.lmbd = lmbd
 
         device = torch.device(self.device)

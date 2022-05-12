@@ -40,9 +40,14 @@ class Solver(BaseSolver):
 
     parameters = {
         'newton_step': [False, True],
-        }
+    }
 
-    def set_objective(self, X, y, lmbd):
+    def skip(self, X, y, lmbd, fit_intercept):
+        if fit_intercept:
+            return True, "no implemented with fit_intercept"
+        return False, None
+
+    def set_objective(self, X, y, lmbd, fit_intercept):
         self.y, self.lmbd = y, lmbd
 
         if sparse.issparse(X):
