@@ -29,6 +29,8 @@ class Solver(BaseSolver):
             "qn",
         ],
     }
+
+    support_sparse = False
     parameter_template = "{solver}"
 
     def set_objective(self, X, y, lmbd):
