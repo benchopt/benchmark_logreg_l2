@@ -1,22 +1,28 @@
 from benchopt import BaseSolver, safe_import_context
-from benchopt.utils.sys_info import _get_cuda_version
 
 
 with safe_import_context() as import_ctx:
-    from snapml import LogisticRegression
     import numpy as np
+    from snapml import LogisticRegression
+
+    import pynvml
+    try:
+        pynvml.nvmlInit()
+        n_gpus = pynvml.nvmlDeviceGetCount()
+    except pynvml.NVMError:
+        n_gpus = 0
 
 
 class Solver(BaseSolver):
     name = "snapml"
 
     install_cmd = "conda"
-    requirements = ["pip:snapml"]
+    requirements = ["pip:snapml", "pynvml"]
 
     parameters = {"gpu": [False, True]}
 
     def skip(self, X, y, lmbd, fit_intercept):
-        if self.gpu and _get_cuda_version() is None:
+        if self.gpu and n_gpus < 1:
             return True, "snapml[gpu=True] needs a GPU to run"
         return False, None
 

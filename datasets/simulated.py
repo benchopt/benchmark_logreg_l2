@@ -18,7 +18,8 @@ class Dataset(BaseDataset):
         'scaled': [True, False]
     }
 
-    def __init__(self, n_samples=10, n_features=50, random_state=42):
+    def __init__(self, n_samples=10, n_features=50, scaled=True,
+                 random_state=42):
         self.n_samples = n_samples
         self.n_features = n_features
         self.random_state = random_state

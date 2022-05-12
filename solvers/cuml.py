@@ -6,8 +6,14 @@ if cuda_version is not None:
     cuda_version = cuda_version.split("cuda_", 1)[1][:4]
 
 with safe_import_context() as import_ctx:
-    if cuda_version is None:
-        raise ImportError("cuml solver needs a nvidia GPU.")
+    import pynvml
+    try:
+        pynvml.nvmlInit()
+    except pynvml.NVMError:
+        raise ImportError("Pynvml was enable to locate NVML lib.")
+    n_gpus = pynvml.nvmlDeviceGetCount()
+    if n_gpus < 1:
+        raise ImportError("Need a GPU to run cuml solver.")
 
     import cudf
     import numpy as np
@@ -20,15 +26,10 @@ class Solver(BaseSolver):
     install_cmd = "conda"
     requirements = [
         "rapidsai::rapids",
-        f"nvidia::cudatoolkit={cuda_version}",
-        "dask-sql",
+        "nvidia::cudatoolkit",
+        "dask-sql", "pynvml"
     ] if cuda_version is not None else []
 
-    parameters = {
-        "solver": [
-            "qn",
-        ],
-    }
     parameter_template = "{solver}"
 
     def set_objective(self, X, y, lmbd, fit_intercept):
@@ -41,7 +42,7 @@ class Solver(BaseSolver):
             C=1 / self.lmbd,
             penalty="l2",
             tol=1e-15,
-            solver=self.solver,
+            solver="qn",
             verbose=0,
         )
 
@@ -50,7 +51,7 @@ class Solver(BaseSolver):
         self.clf.fit(self.X, self.y)
 
     def get_result(self):
-        coef = self.clf.coef_.flatten().to_numpy()
+        coef = self.clf.coef_.to_numpy().flatten()
         if self.clf.fit_intercept:
             coef = np.r_[coef, self.clf.intercept_.to_numpy()]
         return coef
