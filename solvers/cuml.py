@@ -67,4 +67,4 @@ class Solver(BaseSolver):
             if self.clf.fit_intercept:
                 coef = np.r_[coef, self.clf.intercept_.to_numpy()]
 
-        return coef
+        return coef.astype(np.float64)
