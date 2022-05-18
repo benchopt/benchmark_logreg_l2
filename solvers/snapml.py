@@ -1,28 +1,29 @@
 from benchopt import BaseSolver, safe_import_context
+from benchopt.utils.sys_info import get_cuda_version
+from benchopt.stopping_criterion import SufficientProgressCriterion
 
 
 with safe_import_context() as import_ctx:
+    cuda_version = get_cuda_version()
+
     import numpy as np
     from snapml import LogisticRegression
-
-    import pynvml
-    try:
-        pynvml.nvmlInit()
-        n_gpus = pynvml.nvmlDeviceGetCount()
-    except pynvml.NVMError:
-        n_gpus = 0
 
 
 class Solver(BaseSolver):
     name = "snapml"
 
     install_cmd = "conda"
-    requirements = ["pip:snapml", "pynvml"]
+    requirements = ["pip:snapml"]
 
     parameters = {"gpu": [False, True]}
 
+    stopping_criterion = SufficientProgressCriterion(
+        eps=1e-12, patience=10, strategy='iteration'
+    )
+
     def skip(self, X, y, lmbd, fit_intercept):
-        if self.gpu and n_gpus < 1:
+        if self.gpu and cuda_version is None:
             return True, "snapml[gpu=True] needs a GPU to run"
         return False, None
 
@@ -35,7 +36,7 @@ class Solver(BaseSolver):
             penalty="l2",
             tol=1e-12,
             use_gpu=self.gpu,
-            dual=self.X.shape[0] >= self.X.shape[1],
+            dual=False,
         )
 
     def run(self, n_iter):
