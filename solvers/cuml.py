@@ -1,23 +1,18 @@
 from benchopt import BaseSolver, safe_import_context
-from benchopt.utils.sys_info import _get_cuda_version
+from benchopt.helpers.requires_gpu import requires_gpu
+from benchopt.stopping_criterion import SufficientProgressCriterion
 
-cuda_version = _get_cuda_version()
-if cuda_version is not None:
-    cuda_version = cuda_version.split("cuda_", 1)[1][:4]
-
+cuda_version = None
 with safe_import_context() as import_ctx:
-    import pynvml
-    try:
-        pynvml.nvmlInit()
-    except pynvml.NVMError:
-        raise ImportError("Pynvml was enable to locate NVML lib.")
-    n_gpus = pynvml.nvmlDeviceGetCount()
-    if n_gpus < 1:
-        raise ImportError("Need a GPU to run cuml solver.")
-
-    import cudf
     import numpy as np
-    from cuml.linear_model import LogisticRegression
+    from scipy import sparse
+    cuda_version = requires_gpu()
+
+    if cuda_version is not None:
+        import cudf
+        import cupy as cp
+        import cupyx.scipy.sparse as cusparse
+        from cuml.linear_model import LogisticRegression
 
 
 class Solver(BaseSolver):
@@ -27,14 +22,26 @@ class Solver(BaseSolver):
     requirements = [
         "rapidsai::rapids",
         "nvidia::cudatoolkit",
-        "dask-sql", "pynvml"
+        "cupy"
     ] if cuda_version is not None else []
 
-    parameter_template = "{solver}"
+    stopping_criterion = SufficientProgressCriterion(
+        eps=1e-12, patience=5, strategy='iteration'
+    )
 
     def set_objective(self, X, y, lmbd, fit_intercept):
+
         self.X, self.y, self.lmbd = X, y, lmbd
-        self.X = cudf.DataFrame(self.X.astype(np.float32))
+        if sparse.issparse(X):
+            if sparse.isspmatrix_csc(X):
+                self.X = cusparse.csc_matrix(X)
+            elif sparse.isspmatrix_csr(X):
+                self.X = cusparse.csr_matrix(X)
+            else:
+                raise ValueError("Non suported sparse format")
+        else:
+            self.X = cudf.DataFrame(self.X.astype(np.float32))
+
         self.y = cudf.Series((self.y > 0).astype(np.float32))
 
         self.clf = LogisticRegression(
@@ -51,7 +58,13 @@ class Solver(BaseSolver):
         self.clf.fit(self.X, self.y)
 
     def get_result(self):
-        coef = self.clf.coef_.to_numpy().flatten()
-        if self.clf.fit_intercept:
-            coef = np.r_[coef, self.clf.intercept_.to_numpy()]
+        if isinstance(self.clf.coef_, cp.ndarray):
+            coef = self.clf.coef_.get().flatten()
+            if self.clf.fit_intercept:
+                coef = np.r_[coef, self.clf.intercept_.get()]
+        else:
+            coef = self.clf.coef_.to_numpy().flatten()
+            if self.clf.fit_intercept:
+                coef = np.r_[coef, self.clf.intercept_.to_numpy()]
+
         return coef
