@@ -1,4 +1,6 @@
-from benchopt import BaseDataset, safe_import_context
+from benchopt import BaseDataset
+
+from benchopt import safe_import_context
 
 
 with safe_import_context() as import_ctx:
@@ -7,20 +9,19 @@ with safe_import_context() as import_ctx:
 
 
 class Dataset(BaseDataset):
-    name = "rcv1"
-    is_sparse = True
+
+    name = "criteo"
 
     install_cmd = 'conda'
-    requirements = ['pip:libsvmdata', "scikit-learn"]
+    requirements = ['libsvmdata', 'scikit-learn']
 
     parameters = {
         'scaled': [True, False]
     }
 
     def get_data(self):
-
-        X, y = fetch_libsvm('rcv1.binary', min_nnz=0)
-        X_test, y_test = fetch_libsvm('rcv1.binary_test', min_nnz=0)
+        X, y = fetch_libsvm('criteo')
+        X_test, y_test = fetch_libsvm('criteo-test')
 
         if self.scaled:
             # column scaling - sparse dataset so no mean
@@ -28,6 +29,9 @@ class Dataset(BaseDataset):
             X = scaler.fit_transform(X)
             X_test = scaler.transform(X_test)
 
-        data = dict(X=X, y=y, X_test=X_test, y_test=y_test)
+        y[y == y.min()] = -1
+        y[y == y.max()] = 1
+        y_test[y_test == y_test.min()] = -1
+        y_test[y_test == y_test.max()] = 1
 
-        return data
+        return dict(X=X, y=y, X_test=X_test, y_test=y_test)
