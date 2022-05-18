@@ -4,6 +4,8 @@ from benchopt import BaseSolver, safe_import_context
 devices = ['cpu']
 with safe_import_context() as import_ctx:
     import numpy as np
+    from scipy import sparse
+
     import torch
     from torch.utils.data import DataLoader
     from torch.utils.data.dataset import TensorDataset
@@ -21,9 +23,9 @@ class Solver(BaseSolver):
 
     parameters = {
         'solver': ['pgd'],
-        'line_search': [False, True],
-        'stochastic': [False, True],
-        'batch_size': ['full', 1],
+        'stochastic, line_search, batch_size': [
+            (True, False, 1024), (False, True, 'full')
+        ],
         'momentum': [0., 0.7],
         'device': devices
     }
@@ -32,8 +34,11 @@ class Solver(BaseSolver):
         if self.device == 'cuda' and not torch.cuda.is_available():
             return True, "CUDA is not available."
 
+        if sparse.issparse(X):
+            return True, "chop does not support sparse matrices"
+
         if self.stochastic:
-            if self.batch_size == 'full':
+            if self.batch_size == 'full' or self.batch_size > X.shape[0] // 2:
                 msg = "We do not perform full batch optimization "\
                     "with a stochastic optimizer."
                 return True, msg
