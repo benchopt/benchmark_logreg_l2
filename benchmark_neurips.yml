@@ -1,0 +1,15 @@
+objective:
+  - "*[lmbd=[10,1,0.1]]"
+dataset:
+  - ijcnn1
+  - rcv1
+  - news20
+  - madelon
+  - adult
+solver:
+  - cuml
+  - snapml
+  - sklearn
+  - lightning
+  - svrg-tick
+timeout: 3600

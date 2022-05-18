@@ -1,0 +1,11 @@
+dataset:
+  - ijcnn1
+objective:
+  - *[fit_intercept=False]
+solver:
+  - cuml
+  - snapml
+  - sklearn
+  - chop
+  - copt
+  - lightning

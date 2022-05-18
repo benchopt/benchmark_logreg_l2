@@ -1,0 +1,13 @@
+solver:
+  - "sklearn[lbfgs,sga,saga]"
+  - snapml
+  - cuml
+  - lightning
+dataset:
+  - criteo
+objective:
+  - "*[lmbd=1]"
+n_repetitions: 3
+max-runs: 100
+timeout: 7200
+slurm: true
