@@ -12,4 +12,7 @@ solver:
   - sklearn
   - lightning
   - svrg-tick
-timeout: 3600
+timeout: 7200
+n_repetitions: 5
+
+output: logreg-l2_neurips

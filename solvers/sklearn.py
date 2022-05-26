@@ -2,6 +2,7 @@ import warnings
 
 
 from benchopt import BaseSolver, safe_import_context
+from benchopt.stopping_criterion import SufficientProgressCriterion
 
 
 with safe_import_context() as import_ctx:
@@ -29,6 +30,10 @@ class Solver(BaseSolver):
         ],
     }
     parameter_template = "{solver}"
+
+    stopping_criterion = SufficientProgressCriterion(
+        eps=1e-12, patience=5, strategy='iteration'
+    )
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd

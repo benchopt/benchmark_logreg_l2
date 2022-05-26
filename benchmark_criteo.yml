@@ -1,5 +1,5 @@
 solver:
-  - "sklearn[lbfgs,sga,saga]"
+  - "sklearn[lbfgs,sag,saga]"
   - snapml
   - cuml
   - lightning
@@ -8,6 +8,7 @@ dataset:
 objective:
   - "*[lmbd=1]"
 n_repetitions: 3
-max-runs: 100
-timeout: 7200
-slurm: true
+max-runs: 200
+timeout: 14400
+
+output: criteo_neurips
