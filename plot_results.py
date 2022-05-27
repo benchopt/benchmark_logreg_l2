@@ -1,13 +1,22 @@
 import re
 import os
 import itertools
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-from celer.plot_utils import configure_plt
 
-configure_plt()
+
+usetex = mpl.checkdep_usetex(True)
+params = {
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Computer Modern Roman"],
+    "text.usetex": usetex,
+}
+mpl.rcParams.update(params)
+
 
 # matplotlib style config
 titlesize = 22
@@ -163,7 +172,7 @@ for figname, idx_rows, idx_cols in zip(fignames, IDX_ROWS, IDX_COLUMNS):
                         markersize=6,
                     )
 
-                ax.set_xlim([DICT_XLIM.get(dataset, MIN_XLIM), ax.get_xlim()[1]])
+                ax.set_xlim(DICT_XLIM.get(dataset, MIN_XLIM), ax.get_xlim()[1])
 
                 x1, x2 = ax.get_xlim()
                 x1, x2 = np.ceil(np.log10(x1)), np.floor(np.log10(x2))
@@ -176,7 +185,9 @@ for figname, idx_rows, idx_cols in zip(fignames, IDX_ROWS, IDX_COLUMNS):
                 axarr[idx_row, 0].set_yticks(YTICKS)
 
                 axarr[0, idx_col].set_title(clabel, fontsize=labelsize)
-                axarr[n_rows-1, idx_col].set_xlabel("Time (s)", fontsize=labelsize)
+                axarr[n_rows-1, idx_col].set_xlabel(
+                    "Time (s)", fontsize=labelsize
+                )
 
                 ax.tick_params(axis='both', which='major', labelsize=ticksize)
                 ax.grid()
@@ -194,10 +205,13 @@ for figname, idx_rows, idx_cols in zip(fignames, IDX_ROWS, IDX_COLUMNS):
 
     # take first ax, more likely to have all solvers converging
     ax = axarr[0, 0]
-    lines_ordered = list(itertools.chain(*[ax.lines[i::n_col] for i in range(n_col)]))
+    lines_ordered = list(itertools.chain(
+        *[ax.lines[i::n_col] for i in range(n_col)])
+    )
     legend = ax2.legend(
-        lines_ordered, [line.get_label() for line in lines_ordered], ncol=n_col,
-        loc="upper center")
+        lines_ordered, [line.get_label() for line in lines_ordered],
+        ncol=n_col, loc="upper center"
+    )
     leg_fig.canvas.draw()
     leg_fig.tight_layout()
     width = legend.get_window_extent().width
