@@ -21,7 +21,7 @@ class Solver(BaseSolver):
     requirements = [
         "rapidsai::rapids",
         f"nvidia::cudatoolkit={cuda_version}",
-        "dask-sql",
+        "conda-forge::dask-sql",
     ] if cuda_version is not None else []
 
     parameters = {
