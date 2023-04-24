@@ -2,6 +2,10 @@ import warnings
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
+    # see https://github.com/pytorch/pytorch/issues/78490
+    import os
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
     import numpy as np
     import torch
     from torch.utils.data import DataLoader
@@ -22,7 +26,7 @@ class Solver(BaseSolver):
         'batch_size': ['full', 1],
         'momentum': [0., 0.7],
         'device': ['cpu', 'cuda']
-        }
+    }
 
     def skip(self, X, y, lmbd):
         if self.device == 'cuda' and not torch.cuda.is_available():
