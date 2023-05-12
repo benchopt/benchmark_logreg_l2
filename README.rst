@@ -8,7 +8,7 @@ reproducible the comparisons of optimization algorithms.
 The L2-regularized Logistic Regression consists in solving the following program:
 
 $$
-\\min_w \\sum_i \\log(1 + \\exp(-y_i x_i^\\top w)) + \\frac{\\lambda}{2} \\lVert w \\rVert_2^2
+\\min_w \\sum_{i=1}^{n} \\log(1 + \\exp(-y_i x_i^\\top w)) + \\frac{\\lambda}{2} \\lVert w \\rVert_2^2
 $$
 
 where $n$ (or ``n_samples``) stands for the number of samples, $p$ (or ``n_features``) stands for the number of features and
