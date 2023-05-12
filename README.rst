@@ -23,15 +23,16 @@ Install
 
 This benchmark can be run using the following commands:
 
-.. code-block::shell
+.. code-block:: shell
 
    pip install -U benchopt
    git clone https://github.com/benchopt/benchmark_logreg_l2
    benchopt run ./benchmark_logreg_l2
 
+
 Apart from the problem, options can be passed to ``benchopt run``, to restrict the benchmarks to some solvers or datasets, e.g.:
 
-.. code-block::shell
+.. code-block:: shell
 
 	$ benchopt run benchmark_logreg_l2 -s sklearn -d simulated --max-runs 10 --n-repetitions 10
 
