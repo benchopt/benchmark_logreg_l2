@@ -2,6 +2,9 @@ import warnings
 from benchopt import BaseSolver, safe_import_context
 
 with safe_import_context() as import_ctx:
+    import os
+    # see https://github.com/pytorch/pytorch/issues/78490
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     import numpy as np
     import torch
     from torch.utils.data import DataLoader
