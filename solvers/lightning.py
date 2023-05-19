@@ -10,7 +10,6 @@ class Solver(BaseSolver):
 
     install_cmd = 'conda'
     requirements = [
-        'pip:Cython',
         'pip:git+https://github.com/scikit-learn-contrib/lightning.git@master'
     ]
 
