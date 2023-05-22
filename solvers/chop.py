@@ -25,7 +25,7 @@ class Solver(BaseSolver):
         'batch_size': ['full', 1],
         'momentum': [0., 0.7],
         'device': ['cpu', 'cuda']
-        }
+    }
 
     def skip(self, X, y, lmbd):
         if self.device == 'cuda' and not torch.cuda.is_available():

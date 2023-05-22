@@ -10,7 +10,7 @@ class Solver(BaseSolver):
 
     install_cmd = 'conda'
     requirements = [
-        'pip:git+https://github.com/scikit-learn-contrib/lightning.git'
+        'pip:git+https://github.com/scikit-learn-contrib/lightning.git@master'
     ]
 
     def set_objective(self, X, y, lmbd):

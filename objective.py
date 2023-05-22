@@ -11,6 +11,7 @@ def _compute_loss(X, y, lmbd, beta):
 
 
 class Objective(BaseObjective):
+    min_benchopt_version = "1.3"
     name = "L2 Logistic Regression"
 
     parameters = {
@@ -38,5 +39,5 @@ class Objective(BaseObjective):
             )
         return {"value": train_loss, "Test loss": test_loss}
 
-    def to_dict(self):
+    def get_objective(self):
         return dict(X=self.X, y=self.y, lmbd=self.lmbd)
