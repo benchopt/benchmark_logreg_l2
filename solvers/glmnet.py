@@ -49,7 +49,7 @@ class Solver(BaseSolver):
         # y needs to be a categorical response
         self.y = robjects.FactorVector(
             robjects.StrVector(y.astype(int).astype(str))
-            )
+        )
         self.glmnet = robjects.r['glmnet']
 
     def run(self, tol):
