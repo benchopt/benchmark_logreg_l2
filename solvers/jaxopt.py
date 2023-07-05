@@ -1,6 +1,3 @@
-import warnings
-
-
 from benchopt import BaseSolver, safe_import_context
 
 
@@ -83,10 +80,9 @@ class Solver(BaseSolver):
             raise ValueError(f"Unknown solver {self.solver}")
 
         if self.solver != 'scipy-lbfgs':
-          _run = jax.jit(_run)
+            _run = jax.jit(_run)
 
         self.coef_ = _run(self.X, self.y, self.lmbd, n_iter)
-
 
     def get_result(self):
         return np.array(self.coef_)
