@@ -54,7 +54,7 @@ class Solver(BaseSolver):
     name = 'jaxopt'
 
     install_cmd = 'conda'
-    requirements = ['pip:jaxopt']
+    requirements = ['pip:jaxopt', 'pip:optax']
 
     parameters = {
         'solver': [
