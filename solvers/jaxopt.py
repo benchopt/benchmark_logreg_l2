@@ -12,7 +12,6 @@ with safe_import_context() as import_ctx:
     import optax
 
 
-@jax.jit
 def loss(beta, data, lmbd):
     X, y = data
     y_X_beta = y * X.dot(beta.flatten())
@@ -20,7 +19,6 @@ def loss(beta, data, lmbd):
     return jnp.log1p(jnp.exp(-y_X_beta)).sum() + lmbd * l2
 
 
-@jax.jit
 def _run_lbfgs_solver(X, y, lmbd, n_iter):
     solver = jaxopt.LBFGS(fun=loss, maxiter=n_iter, tol=1e-15)
     beta_init = jnp.zeros(X.shape[1])
@@ -28,7 +26,6 @@ def _run_lbfgs_solver(X, y, lmbd, n_iter):
     return res.params
 
 
-@jax.jit
 def _run_ncg_solver(X, y, lmbd, n_iter):
     solver = jaxopt.NonlinearCG(fun=loss, maxiter=n_iter, tol=1e-15)
     beta_init = jnp.zeros(X.shape[1])
@@ -36,7 +33,6 @@ def _run_ncg_solver(X, y, lmbd, n_iter):
     return res.params
 
 
-@jax.jit
 def _run_adam_solver(X, y, lmbd, n_iter):
     opt = optax.adam(1e-3)
     solver = jaxopt.OptaxSolver(opt=opt, fun=loss, maxiter=n_iter, tol=1e-15,
@@ -47,7 +43,8 @@ def _run_adam_solver(X, y, lmbd, n_iter):
 
 
 def _run_scipy_solver(X, y, lmbd, n_iter):
-    solver = jaxopt.ScipyMinimize(fun=loss, maxiter=n_iter, tol=1e-15, method='L-BFGS-B')
+    solver = jaxopt.ScipyMinimize(fun=loss, maxiter=n_iter, tol=1e-15,
+                                  method='L-BFGS-B')
     beta_init = jnp.zeros(X.shape[1])
     res = solver.run(beta_init, data=(X, y), lmbd=lmbd)
     return res.params
@@ -75,15 +72,21 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         if self.solver == 'lbfgs':
-            self.coef_ = _run_lbfgs_solver(self.X, self.y, self.lmbd, n_iter)
+            _run = _run_lbfgs_solver
         elif self.solver == 'scipy-lbfgs':
-            self.coef_ = _run_scipy_solver(self.X, self.y, self.lmbd, n_iter)
+            _run = _run_scipy_solver
         elif self.solver == 'ncg':
-            self.coef_ = _run_ncg_solver(self.X, self.y, self.lmbd, n_iter)
+            _run = _run_ncg_solver
         elif self.solver == 'adam':
-            self.coef_ = _run_adam_solver(self.X, self.y, self.lmbd, n_iter)
+            _run = _run_adam_solver
         else:
             raise ValueError(f"Unknown solver {self.solver}")
+
+        if self.solver != 'scipy-lbfgs':
+          _run = jax.jit(_run)
+
+        self.coef_ = _run(self.X, self.y, self.lmbd, n_iter)
+
 
     def get_result(self):
         return np.array(self.coef_)
