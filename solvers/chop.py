@@ -172,4 +172,4 @@ class Solver(BaseSolver):
             self.run_full_batch(n_iter)
 
     def get_result(self):
-        return self.beta.detach().cpu().numpy().flatten()
+        return dict(beta=self.beta.detach().cpu().numpy().flatten())
