@@ -29,7 +29,7 @@ class Solver(BaseSolver):
         self.w = w
 
     def get_result(self):
-        return self.w
+        return dict(beta=self.w)
 
     def compute_lipschitz_constant(self):
         if not sparse.issparse(self.X):
