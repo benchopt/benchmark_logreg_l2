@@ -82,4 +82,4 @@ class Solver(BaseSolver):
         coefs = np.array(as_matrix(results["beta"], "matrix"))
         beta = coefs.flatten()
 
-        return beta
+        return dict(beta=beta)
