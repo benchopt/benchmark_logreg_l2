@@ -11,8 +11,8 @@ def _compute_loss(X, y, lmbd, beta):
 
 
 class Objective(BaseObjective):
-    min_benchopt_version = "1.3"
     name = "L2 Logistic Regression"
+    min_benchopt_version = "1.5"
 
     parameters = {
         'lmbd': [1., 0.01]

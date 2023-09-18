@@ -1,4 +1,4 @@
-objective-filter:
+objective:
   - L2 Logistic Regression[lmbd=0.1]
 dataset:
   - simulated[n_features=500,n_samples=200]
