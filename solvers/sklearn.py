@@ -1,5 +1,5 @@
 import warnings
-
+import numpy as np
 
 from benchopt import BaseSolver, safe_import_context
 
@@ -21,6 +21,7 @@ class Solver(BaseSolver):
         'solver': [
             'liblinear',
             'newton-cg',
+            'newton-cholesky',
             'lbfgs',
             'sag',
             'saga',
@@ -28,6 +29,11 @@ class Solver(BaseSolver):
         ],
     }
     parameter_template = "{solver}"
+
+    def skip(self, X, y, lmbd):
+        if len(np.unique(y)) != 2 and self.solver == 'newton-cholesky':
+            return True, "Newton-Cholesky only works for binary classification"
+        return False, None
 
     def set_objective(self, X, y, lmbd):
         self.X, self.y, self.lmbd = X, y, lmbd
