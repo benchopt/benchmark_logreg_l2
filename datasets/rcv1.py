@@ -24,6 +24,4 @@ class Dataset(BaseDataset):
                 'rcv1.binary_test', min_nnz=0
             )
 
-        data = dict(X=self.X, y=self.y, X_test=self.X_test, y_test=self.y_test)
-
-        return data
+        return dict(X=self.X, y=self.y, X_test=self.X_test, y_test=self.y_test)
