@@ -39,7 +39,7 @@ class Solver(BaseSolver):
 
         if self.solver == 'sgd':
             self.clf = SGDClassifier(
-                loss="log", alpha=self.lmbd / (X.shape[0] * 2.0),
+                loss="log_loss", alpha=self.lmbd / (X.shape[0] * 2.0),
                 penalty='l2', fit_intercept=False, tol=1e-15,
                 random_state=42, eta0=.01, learning_rate="constant"
             )
