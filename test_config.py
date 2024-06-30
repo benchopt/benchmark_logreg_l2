@@ -20,7 +20,7 @@ def check_test_solver_install(solver_class):
         if cuda_version is None:
             pytest.xfail("Cuml needs a working GPU hardware.")
 
-    if 'snaml' in solver_class.name.lower():
+    if 'snapml' in solver_class.name.lower():
         if is_platform_macOS:
             pytest.skip(
                 "Running snapml on MacOS takes a lot of time.\n"
