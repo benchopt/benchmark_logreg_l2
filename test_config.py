@@ -3,6 +3,7 @@ import pytest  # noqa: F401
 
 from benchopt.utils.sys_info import get_cuda_version
 
+
 def is_numpy_2():
     import numpy as np
     return np.__version__ > '2'
@@ -17,7 +18,6 @@ def check_test_solver_install(solver_class):
     """
     cuda_version = get_cuda_version()
     is_platform_macOS = sys.platform == "darwin"
-    is_numpy_2 = False
 
     if solver_class.name.lower() == "cuml":
         if is_platform_macOS:
