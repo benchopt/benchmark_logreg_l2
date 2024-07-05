@@ -1,10 +1,11 @@
 import warnings
 
-
 from benchopt import BaseSolver, safe_import_context
 
 
 with safe_import_context() as import_ctx:
+    import numpy as np
+
     from sklearn.exceptions import ConvergenceWarning
     from sklearn.linear_model import LogisticRegression
     from sklearn.linear_model import SGDClassifier
@@ -21,6 +22,7 @@ class Solver(BaseSolver):
         'solver': [
             'liblinear',
             'newton-cg',
+            'newton-cholesky',
             'lbfgs',
             'sag',
             'saga',
@@ -28,6 +30,11 @@ class Solver(BaseSolver):
         ],
     }
     parameter_template = "{solver}"
+
+    def skip(self, X, y, lmbd):
+        if len(np.unique(y)) != 2 and self.solver == 'newton-cholesky':
+            return True, "Newton-Cholesky only works for binary classification"
+        return False, None
 
     def set_objective(self, X, y, lmbd):
         self.X, self.y, self.lmbd = X, y, lmbd
