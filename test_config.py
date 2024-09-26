@@ -36,6 +36,9 @@ def check_test_solver_install(solver_class):
                 "SnapML is not supported with numpy >= 2.\n"
                 "See benchopt/benchmark_logreg_l2#51 for tracking."
             )
+    if solver_class.name.lower() == "lightning":
+        if is_numpy_2():
+            pytest.skip("Lightning is not compatible with numpy2.0")
 
     if solver_class.name.lower() == 'copt':
         if is_numpy_2():
