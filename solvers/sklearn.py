@@ -9,7 +9,6 @@ with safe_import_context() as import_ctx:
     from sklearn.exceptions import ConvergenceWarning
     from sklearn.linear_model import LogisticRegression
     from sklearn.linear_model import SGDClassifier
-    from scipy.optimize.linesearch import LineSearchWarning
 
 
 class Solver(BaseSolver):
@@ -40,7 +39,6 @@ class Solver(BaseSolver):
         self.X, self.y, self.lmbd = X, y, lmbd
 
         warnings.filterwarnings('ignore', category=ConvergenceWarning)
-        warnings.filterwarnings('ignore', category=LineSearchWarning)
         warnings.filterwarnings('ignore', category=UserWarning,
                                 message='Line Search failed')
 
