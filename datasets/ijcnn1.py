@@ -7,7 +7,7 @@ with safe_import_context() as import_ctx:
 
 
 class Dataset(BaseDataset):
-    name = "news20"
+    name = "ijcnn1"
     is_sparse = True
 
     install_cmd = "conda"
@@ -19,6 +19,7 @@ class Dataset(BaseDataset):
     def get_data(self):
 
         if self.X is None:
-            self.X, self.y = fetch_libsvm("news20.binary")
-
+            self.X, self.y = fetch_libsvm("ijcnn1")
+            # column scaling
+            self.X = (self.X - self.X.mean(0)) / self.X.std(0)
         return dict(X=self.X, y=self.y)
