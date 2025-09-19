@@ -48,7 +48,7 @@ class Solver(BaseSolver):
         # y needs to be a categorical response
         self.y = robjects.FactorVector(
             robjects.StrVector(y.astype(int).astype(str))
-            )
+        )
         self.glmnet = robjects.r['glmnet']
 
     def run(self, tol):
@@ -78,7 +78,7 @@ class Solver(BaseSolver):
 
     def get_result(self):
         with converter_ctx():
-            results = dict(zip(self.glmnet_fit.names, list(self.glmnet_fit)))
+            results = dict(zip(self.glmnet_fit.names(), list(self.glmnet_fit)))
             as_matrix = robjects.r['as']
             coefs = np.array(as_matrix(results["beta"], "matrix"))
             beta = coefs.flatten()
