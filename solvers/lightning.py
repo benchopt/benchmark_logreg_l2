@@ -1,8 +1,7 @@
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 
 
-with safe_import_context() as import_ctx:
-    from lightning.classification import CDClassifier
+from lightning.classification import CDClassifier
 
 
 class Solver(BaseSolver):

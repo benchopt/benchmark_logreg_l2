@@ -1,9 +1,8 @@
-from benchopt import BaseDataset, safe_import_context
+from benchopt import BaseDataset
 
 
-with safe_import_context() as import_ctx:
-    from sklearn.datasets import fetch_covtype
-    from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import fetch_covtype
+from sklearn.preprocessing import StandardScaler
 
 
 class Dataset(BaseDataset):

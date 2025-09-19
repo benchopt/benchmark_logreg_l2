@@ -1,18 +1,17 @@
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 from benchopt.stopping_criterion import INFINITY
 from benchopt.stopping_criterion import SufficientProgressCriterion
 
-with safe_import_context() as import_ctx:
-    import numpy as np
-    from scipy import sparse
+import numpy as np
+from scipy import sparse
 
-    from rpy2 import robjects
-    from rpy2.robjects import numpy2ri, packages
-    from benchopt.helpers.r_lang import import_rpackages
+from rpy2 import robjects
+from rpy2.robjects import packages
+from benchopt.helpers.r_lang import import_rpackages, converter_ctx
 
-    # Setup the system to allow rpy2 running
-    numpy2ri.activate()
-    import_rpackages('glmnet')
+
+# Setup the system to allow rpy2 running
+import_rpackages('glmnet')
 
 
 class Solver(BaseSolver):
@@ -71,15 +70,17 @@ class Solver(BaseSolver):
         # with a single lambda may be suboptimal if it is small, but there is
         # no other way to force glmnet to solve for a prescribed lambda.
         fit_dict = {"lambda": self.lmbd / len(self.y)}
-        self.glmnet_fit = self.glmnet(
-            self.X, self.y, intercept=False,
-            family="binomial", alpha=0,
-            standardize=False, maxit=maxit, thresh=thresh, **fit_dict)
+        with converter_ctx():
+            self.glmnet_fit = self.glmnet(
+                self.X, self.y, intercept=False,
+                family="binomial", alpha=0,
+                standardize=False, maxit=maxit, thresh=thresh, **fit_dict)
 
     def get_result(self):
-        results = dict(zip(self.glmnet_fit.names, list(self.glmnet_fit)))
-        as_matrix = robjects.r['as']
-        coefs = np.array(as_matrix(results["beta"], "matrix"))
-        beta = coefs.flatten()
+        with converter_ctx():
+            results = dict(zip(self.glmnet_fit.names, list(self.glmnet_fit)))
+            as_matrix = robjects.r['as']
+            coefs = np.array(as_matrix(results["beta"], "matrix"))
+            beta = coefs.flatten()
 
         return dict(beta=beta)
