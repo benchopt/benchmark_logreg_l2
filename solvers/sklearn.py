@@ -1,14 +1,11 @@
 import warnings
 
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 
-
-with safe_import_context() as import_ctx:
-    import numpy as np
-
-    from sklearn.exceptions import ConvergenceWarning
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.linear_model import SGDClassifier
+import numpy as np
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
 
 
 class Solver(BaseSolver):

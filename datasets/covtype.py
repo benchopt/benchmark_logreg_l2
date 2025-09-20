@@ -1,21 +1,24 @@
-from benchopt import BaseDataset, safe_import_context
+from benchopt import BaseDataset
 
 
-with safe_import_context() as import_ctx:
-    from sklearn.datasets import fetch_covtype
-    from sklearn.preprocessing import StandardScaler
+from libsvmdata import fetch_libsvm
+from sklearn.preprocessing import StandardScaler
 
 
 class Dataset(BaseDataset):
     name = "covtype_binary"
 
     install_cmd = 'conda'
-    requirements = ['scikit-learn']
+    requirements = ['pip:libsvmdata', 'scikit-learn']
 
     def get_data(self):
-        X, y = fetch_covtype(return_X_y=True)
-        y[y != 2] = -1
-        y[y == 2] = 1  # try to separate class 2 from the other 6 classes.
+        X, y = fetch_libsvm("covtype.binary")
+
+        # Data is sparse, convert to dense array
+        X = X.toarray()
+
+        # Labels are {1,2}, convert to {-1, 1}
+        y = (2 * y - 3).astype(int)
 
         # This dataset contains a mixture of numeric columns and
         # one-hot-encoded categorical columns, scale it to avoid very large

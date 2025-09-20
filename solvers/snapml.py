@@ -1,10 +1,9 @@
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 from benchopt.utils.sys_info import get_cuda_version
 
 
-with safe_import_context() as import_ctx:
-    from snapml import LogisticRegression
-    import numpy as np
+from snapml import LogisticRegression
+import numpy as np
 
 
 class Solver(BaseSolver):
