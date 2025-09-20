@@ -10,7 +10,7 @@ class Solver(BaseSolver):
     name = "snapml"
 
     install_cmd = "conda"
-    requirements = ["pip:snapml"]
+    requirements = ["pip::snapml"]
 
     parameters = {"gpu": [False, True]}
 

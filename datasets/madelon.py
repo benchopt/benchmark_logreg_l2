@@ -8,7 +8,7 @@ class Dataset(BaseDataset):
     name = "madelon"
 
     install_cmd = 'conda'
-    requirements = ['pip:libsvmdata']
+    requirements = ['pip::libsvmdata']
 
     def get_data(self):
         X, y = fetch_libsvm("madelon")
