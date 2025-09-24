@@ -2,7 +2,6 @@ solver:
   - "sklearn[lbfgs,sag,saga]"
   - snapml
   - cuml
-  - lightning
 dataset:
   - criteo
 objective:

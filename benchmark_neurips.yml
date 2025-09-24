@@ -10,8 +10,6 @@ solver:
   - cuml
   - snapml
   - sklearn
-  - lightning
-  - svrg-tick
 timeout: 7200
 n_repetitions: 5
 
