@@ -9,7 +9,7 @@ class Dataset(BaseDataset):
     name = "covtype_binary"
 
     install_cmd = 'conda'
-    requirements = ['pip:libsvmdata', 'scikit-learn']
+    requirements = ['pip::libsvmdata', 'scikit-learn']
 
     parameters = {
         'scaled': [True, False]

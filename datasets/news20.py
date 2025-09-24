@@ -9,7 +9,7 @@ class Dataset(BaseDataset):
     is_sparse = True
 
     install_cmd = "conda"
-    requirements = ["pip:libsvmdata", "scikit-learn"]
+    requirements = ["pip::libsvmdata", "scikit-learn"]
 
     parameters = {
         'scaled': [True, False]

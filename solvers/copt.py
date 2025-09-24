@@ -12,7 +12,7 @@ class Solver(BaseSolver):
     name = 'copt'
 
     install_cmd = 'conda'
-    requirements = ['pip:https://github.com/openopt/copt/archive/master.zip']
+    requirements = ['pip::https://github.com/openopt/copt/archive/master.zip']
 
     parameters = {
         'accelerated': [False, True],

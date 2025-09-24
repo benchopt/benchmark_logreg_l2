@@ -11,7 +11,7 @@ class Solver(BaseSolver):
 
     install_cmd = 'conda'
     requirements = [
-        'pip:git+https://github.com/scikit-learn-contrib/lightning.git@master'
+        'pip::git+https://github.com/scikit-learn-contrib/lightning.git@master'
     ]
 
     stopping_strategy = "callback"

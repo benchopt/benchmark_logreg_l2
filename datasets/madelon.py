@@ -8,7 +8,7 @@ class Dataset(BaseDataset):
     name = "madelon"
 
     install_cmd = 'conda'
-    requirements = ['libsvmdata', 'scikit-learn']
+    requirements = ['pip::libsvmdata', 'scikit-learn']
 
     parameters = {
         'scaled': [True, False]
