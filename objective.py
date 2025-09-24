@@ -33,10 +33,10 @@ class Objective(BaseObjective):
         msg = "Logistic loss is implemented with y in [-1, 1]"
         assert set(self.y) == {-1, 1}, msg
 
-    def get_one_solution(self):
+    def get_one_result(self):
         return dict(beta=np.zeros(self.X.shape[1] + self.fit_intercept))
 
-    def compute(self, beta):
+    def evaluate_result(self, beta):
         train_loss, train_error = _compute_loss(
             self.X, self.y, self.lmbd, beta, self.fit_intercept
         )
