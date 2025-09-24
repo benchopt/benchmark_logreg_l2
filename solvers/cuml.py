@@ -17,17 +17,18 @@ class Solver(BaseSolver):
     name = "cuml"
 
     install_cmd = "conda"
-    requirements = [
-        "pip::cuml",
-    ]
+    requirements = ["pip::cuml"]
 
     parameters = {
         "solver": [
             "qn",
         ],
     }
-
     parameter_template = "{solver}"
+
+    stopping_criterion = SufficientProgressCriterion(
+        eps=1e-12, patience=5, strategy='iteration'
+    )
 
     def skip(self, X, y, lmbd, fit_intercept):
         if cuda_version is None:
