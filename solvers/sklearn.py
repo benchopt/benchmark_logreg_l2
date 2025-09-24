@@ -1,16 +1,12 @@
 import warnings
 
-
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 from benchopt.stopping_criterion import SufficientProgressCriterion
 
-
-with safe_import_context() as import_ctx:
-    import numpy as np
-    from sklearn.exceptions import ConvergenceWarning
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.linear_model import SGDClassifier
-    from scipy.optimize.linesearch import LineSearchWarning
+import numpy as np
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import SGDClassifier
 
 
 class Solver(BaseSolver):
@@ -23,6 +19,7 @@ class Solver(BaseSolver):
         'solver': [
             'liblinear',
             'newton-cg',
+            'newton-cholesky',
             'lbfgs',
             'sag',
             'saga',
@@ -30,16 +27,19 @@ class Solver(BaseSolver):
         ],
     }
     parameter_template = "{solver}"
-
     stopping_criterion = SufficientProgressCriterion(
         eps=1e-12, patience=5, strategy='iteration'
     )
+
+    def skip(self, X, y, lmbd, fit_intercept):
+        if len(np.unique(y)) != 2 and self.solver == 'newton-cholesky':
+            return True, "Newton-Cholesky only works for binary classification"
+        return False, None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd
 
         warnings.filterwarnings('ignore', category=ConvergenceWarning)
-        warnings.filterwarnings('ignore', category=LineSearchWarning)
         warnings.filterwarnings('ignore', category=UserWarning,
                                 message='Line Search failed')
 
@@ -65,4 +65,4 @@ class Solver(BaseSolver):
         coef = self.clf.coef_.flatten()
         if self.clf.fit_intercept:
             coef = np.r_[coef, self.clf.intercept_]
-        return coef
+        return dict(beta=coef)

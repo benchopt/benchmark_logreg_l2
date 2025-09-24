@@ -1,8 +1,7 @@
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 
-with safe_import_context() as import_ctx:
-    import numpy as np
-    from scipy import sparse
+import numpy as np
+from scipy import sparse
 
 
 class Solver(BaseSolver):
@@ -35,7 +34,7 @@ class Solver(BaseSolver):
             self.w = np.r_[self.w, c]
 
     def get_result(self):
-        return self.w
+        return dict(beta=self.w)
 
     def compute_lipschitz_constant(self):
         if not sparse.issparse(self.X):

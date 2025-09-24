@@ -1,8 +1,7 @@
-from benchopt import BaseObjective, safe_import_context
+from benchopt import BaseObjective
 
-with safe_import_context() as ctx:
-    import numpy as np
-    from scipy import sparse
+import numpy as np
+from scipy import sparse
 
 
 def _compute_loss(X, y, lmbd, beta, fit_intercept):
@@ -20,6 +19,7 @@ def _compute_loss(X, y, lmbd, beta, fit_intercept):
 
 class Objective(BaseObjective):
     name = "L2 Logistic Regression"
+    min_benchopt_version = "1.7"
 
     parameters = {
         'lmbd': [0.1, 1.0],
@@ -34,7 +34,7 @@ class Objective(BaseObjective):
         assert set(self.y) == {-1, 1}, msg
 
     def get_one_solution(self):
-        return np.zeros(self.X.shape[1] + self.fit_intercept)
+        return dict(beta=np.zeros(self.X.shape[1] + self.fit_intercept))
 
     def compute(self, beta):
         train_loss, train_error = _compute_loss(
@@ -53,9 +53,9 @@ class Objective(BaseObjective):
             "value": train_loss
         }
 
-    def to_dict(self):
+    def get_objective(self):
         return dict(
-            X=self.X, y=self.y, lmbd=self.lmbd,  # * self.lmbd_scale,
+            X=self.X, y=self.y, lmbd=self.lmbd * self.lmbd_scale,
             fit_intercept=self.fit_intercept
         )
 

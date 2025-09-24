@@ -1,11 +1,7 @@
 from benchopt import BaseDataset
 
-from benchopt import safe_import_context
-
-
-with safe_import_context() as import_ctx:
-    from libsvmdata import fetch_libsvm
-    from sklearn.preprocessing import StandardScaler
+from libsvmdata import fetch_libsvm
+from sklearn.preprocessing import StandardScaler
 
 
 class Dataset(BaseDataset):

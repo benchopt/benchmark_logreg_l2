@@ -1,11 +1,9 @@
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 
-
-with safe_import_context() as import_ctx:
-    import numpy as np
-    from lightning import classification
-    from lightning.impl.dataset_fast import get_dataset
-    from lightning.impl.sag_fast import get_auto_step_size
+import numpy as np
+from lightning import classification
+from lightning.impl.dataset_fast import get_dataset
+from lightning.impl.sag_fast import get_auto_step_size
 
 
 class Solver(BaseSolver):
@@ -13,7 +11,7 @@ class Solver(BaseSolver):
 
     install_cmd = 'conda'
     requirements = [
-        'pip:git+https://github.com/scikit-learn-contrib/lightning.git'
+        'pip:git+https://github.com/scikit-learn-contrib/lightning.git@master'
     ]
 
     stopping_strategy = "callback"
@@ -75,4 +73,4 @@ class Solver(BaseSolver):
         self.clf.fit(self.X, self.y)
 
     def get_result(self):
-        return self.clf.coef_.flatten()
+        return dict(beta=self.clf.coef_.flatten())

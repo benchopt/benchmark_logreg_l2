@@ -1,12 +1,11 @@
 import warnings
-from benchopt import BaseSolver, safe_import_context
+from benchopt import BaseSolver
 
 
-with safe_import_context() as import_ctx:
-    import numpy as np
-    import copt as cp
-    import copt.loss
-    import copt.penalty
+import numpy as np
+import copt as cp
+import copt.loss
+import copt.penalty
 
 
 class Solver(BaseSolver):
@@ -109,4 +108,4 @@ class Solver(BaseSolver):
         self.beta = result.x
 
     def get_result(self):
-        return self.beta.flatten()
+        return dict(beta=self.beta.flatten())
