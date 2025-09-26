@@ -1,0 +1,16 @@
+objective:
+  - "*[lmbd=[10,1,0.1]]"
+dataset:
+  - ijcnn1
+  - rcv1
+  - news20
+  - madelon
+  - adult
+solver:
+  - cuml
+  - snapml
+  - sklearn
+timeout: 7200
+n_repetitions: 5
+
+output: logreg-l2_neurips

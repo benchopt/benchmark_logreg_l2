@@ -11,6 +11,10 @@ class Dataset(BaseDataset):
     install_cmd = 'conda'
     requirements = ['pip::libsvmdata', 'scikit-learn']
 
+    parameters = {
+        'scaled': [True, False]
+    }
+
     def get_data(self):
         X, y = fetch_libsvm("covtype.binary")
 
@@ -23,6 +27,9 @@ class Dataset(BaseDataset):
         # This dataset contains a mixture of numeric columns and
         # one-hot-encoded categorical columns, scale it to avoid very large
         # condition number.
-        X = StandardScaler().fit_transform(X)
+        if self.scaled:
+            # column scaling
+            scaler = StandardScaler(with_mean=False)
+            X = scaler.fit_transform(X)
 
         return dict(X=X, y=y)
