@@ -23,7 +23,7 @@ class Objective(BaseObjective):
 
     parameters = {
         'lmbd': [0.1, 1.0],
-        'fit_intercept': [True, False]
+        'fit_intercept': [False, True]
     }
 
     def set_data(self, X, y, X_test=None, y_test=None):

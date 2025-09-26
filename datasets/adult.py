@@ -20,7 +20,7 @@ class Dataset(BaseDataset):
     def get_data(self):
 
         data = fetch_openml(data_id=1590, as_frame=True)
-        X = pd.get_dummies(data.data).values
+        X = pd.get_dummies(data.data).values.astype('float')
         label_encoder = LabelBinarizer(neg_label=-1)
         y = label_encoder.fit_transform(data.target)[:, 0]
 

@@ -36,7 +36,8 @@ class Solver(BaseSolver):
         return False, None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
-        self.X, self.y, self.lmbd = X, y, lmbd
+        self.lmbd = lmbd
+
         if sparse.issparse(X):
             if sparse.isspmatrix_csc(X):
                 self.X = cusparse.csc_matrix(X)
@@ -45,9 +46,9 @@ class Solver(BaseSolver):
             else:
                 raise ValueError("Non suported sparse format")
         else:
-            self.X = cudf.DataFrame(self.X.astype(np.float32))
+            self.X = cudf.DataFrame(X.astype(np.float32))
 
-        self.y = cudf.Series((self.y > 0).astype(np.float32))
+        self.y = cudf.Series((y > 0).astype(np.float32))
 
         self.clf = LogisticRegression(
             fit_intercept=fit_intercept,

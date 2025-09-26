@@ -32,7 +32,8 @@ class Solver(BaseSolver):
         patience=7, eps=1e-38, strategy='tolerance'
     )
 
-    def set_objective(self, X, y, lmbd):
+    def set_objective(self, X, y, lmbd, fit_intercept):
+        self.lmbd, self.fit_intercept = lmbd, fit_intercept
         if sparse.issparse(X):
             r_Matrix = packages.importr("Matrix")
             X = X.tocoo()
@@ -44,7 +45,6 @@ class Solver(BaseSolver):
             )
         else:
             self.X = X
-        self.y, self.lmbd = y, lmbd
         # y needs to be a categorical response
         self.y = robjects.FactorVector(
             robjects.StrVector(y.astype(int).astype(str))
@@ -72,7 +72,7 @@ class Solver(BaseSolver):
         fit_dict = {"lambda": self.lmbd / len(self.y)}
         with converter_ctx():
             self.glmnet_fit = self.glmnet(
-                self.X, self.y, intercept=False,
+                self.X, self.y, intercept=self.fit_intercept,
                 family="binomial", alpha=0,
                 standardize=False, maxit=maxit, thresh=thresh, **fit_dict)
 
@@ -82,5 +82,10 @@ class Solver(BaseSolver):
             as_matrix = robjects.r['as']
             coefs = np.array(as_matrix(results["beta"], "matrix"))
             beta = coefs.flatten()
+            if self.fit_intercept:
+                intercept = (
+                    np.array(as_matrix(results["a0"], "vector"))
+                )
+                beta = np.r_[beta, intercept]
 
         return dict(beta=beta)
