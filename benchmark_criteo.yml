@@ -1,0 +1,13 @@
+solver:
+  - "sklearn[lbfgs,sag,saga]"
+  - snapml
+  - cuml
+dataset:
+  - criteo
+objective:
+  - "*[lmbd=1]"
+n_repetitions: 3
+max-runs: 200
+timeout: 14400
+
+output: criteo_neurips

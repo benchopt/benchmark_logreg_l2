@@ -20,7 +20,7 @@ class Solver(BaseSolver):
         'solver': ['pgd', 'svrg', 'saga'],
     }
 
-    def skip(self, X, y, lmbd):
+    def skip(self, X, y, lmbd, fit_intercept):
         if (X.shape[1] > 50_000) and self.solver not in ['svrg', 'saga']:
             return True, (
                 f"problem too large (n_features={X.shape[1]} > 50000) "
@@ -39,9 +39,11 @@ class Solver(BaseSolver):
                 f"{self.solver}"
             )
 
+        if fit_intercept:
+            return True, "no implemented with fit_intercept"
         return False, None
 
-    def set_objective(self, X, y, lmbd):
+    def set_objective(self, X, y, lmbd, fit_intercept):
         y = (y > 0).astype(np.float64)
         self.X, self.y, self.lmbd = X, y, lmbd
 

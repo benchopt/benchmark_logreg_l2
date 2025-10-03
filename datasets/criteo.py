@@ -5,24 +5,29 @@ from sklearn.preprocessing import StandardScaler
 
 
 class Dataset(BaseDataset):
-    name = "madelon"
+
+    name = "criteo"
 
     install_cmd = 'conda'
-    requirements = ['pip::libsvmdata', 'scikit-learn']
+    requirements = ['libsvmdata', 'scikit-learn']
 
     parameters = {
         'scaled': [True, False]
     }
 
     def get_data(self):
-        X, y = fetch_libsvm("madelon")
-        X_test, y_test = fetch_libsvm("madelon_test")
+        X, y = fetch_libsvm('criteo')
+        X_test, y_test = fetch_libsvm('criteo-test')
 
         if self.scaled:
-            # column scaling
+            # column scaling - sparse dataset so no mean
             scaler = StandardScaler(with_mean=False)
             X = scaler.fit_transform(X)
             X_test = scaler.transform(X_test)
 
-        data = dict(X=X, y=y, X_test=X_test, y_test=y_test)
-        return data
+        y[y == y.min()] = -1
+        y[y == y.max()] = 1
+        y_test[y_test == y_test.min()] = -1
+        y_test[y_test == y_test.max()] = 1
+
+        return dict(X=X, y=y, X_test=X_test, y_test=y_test)

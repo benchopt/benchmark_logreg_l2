@@ -1,48 +1,61 @@
 from benchopt import BaseSolver
 from benchopt.utils.sys_info import get_cuda_version
+from benchopt.stopping_criterion import SufficientProgressCriterion
+
+import numpy as np
+from scipy import sparse
 
 import cudf
-import numpy as np
+import cupy as cp
+import cupyx.scipy.sparse as cusparse
 from cuml.linear_model import LogisticRegression
 
 cuda_version = get_cuda_version()
-if cuda_version is not None:
-    cuda_version = cuda_version.split("cuda_", 1)[1][:4]
-
-if cuda_version is None:
-    raise ImportError("cuml solver needs a nvidia GPU.")
 
 
 class Solver(BaseSolver):
     name = "cuml"
 
     install_cmd = "conda"
-    requirements = [
-        "rapidsai::rapids",
-        "nvidia::'cuda-version>=11.4,<=12.8'",
-        "dask-sql",
-    ]
+    requirements = ["pip::cuml"]
 
     parameters = {
         "solver": [
             "qn",
         ],
     }
-
-    support_sparse = False
     parameter_template = "{solver}"
 
-    def set_objective(self, X, y, lmbd):
-        self.X, self.y, self.lmbd = X, y, lmbd
-        self.X = cudf.DataFrame(self.X.astype(np.float32))
-        self.y = cudf.Series((self.y > 0).astype(np.float32))
+    stopping_criterion = SufficientProgressCriterion(
+        eps=1e-12, patience=5, strategy='iteration'
+    )
+
+    def skip(self, X, y, lmbd, fit_intercept):
+        if cuda_version is None:
+            return True, "cuml solver needs a nvidia GPU."
+        return False, None
+
+    def set_objective(self, X, y, lmbd, fit_intercept):
+        self.lmbd = lmbd
+
+        if sparse.issparse(X):
+            if sparse.isspmatrix_csc(X):
+                self.X = cusparse.csc_matrix(X)
+            elif sparse.isspmatrix_csr(X):
+                self.X = cusparse.csr_matrix(X)
+            else:
+                raise ValueError("Non suported sparse format")
+        else:
+            self.X = cudf.DataFrame(X.astype(np.float32))
+
+        self.y = cudf.Series((y > 0).astype(np.float32))
 
         self.clf = LogisticRegression(
-            fit_intercept=False,
+            fit_intercept=fit_intercept,
             C=1 / self.lmbd,
             penalty="l2",
             tol=1e-15,
-            solver=self.solver,
+            solver="qn",
             verbose=0,
         )
 
@@ -51,4 +64,13 @@ class Solver(BaseSolver):
         self.clf.fit(self.X, self.y)
 
     def get_result(self):
-        return dict(beta=self.clf.coef_.to_numpy().flatten())
+        if isinstance(self.clf.coef_, cp.ndarray):
+            coef = self.clf.coef_.get().flatten()
+            if self.clf.fit_intercept:
+                coef = np.r_[coef, self.clf.intercept_.get()]
+        else:
+            coef = self.clf.coef_.to_numpy().flatten()
+            if self.clf.fit_intercept:
+                coef = np.r_[coef, self.clf.intercept_.to_numpy()]
+
+        return dict(beta=coef.astype(np.float64))
