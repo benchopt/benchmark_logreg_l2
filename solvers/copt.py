@@ -20,28 +20,26 @@ class Solver(BaseSolver):
         'solver': ['pgd', 'svrg', 'saga'],
     }
 
-    def skip(self, X, y, lmbd, fit_intercept):
-        if (X.shape[1] > 50_000) and self.solver not in ['svrg', 'saga']:
-            return True, (
-                f"problem too large (n_features={X.shape[1]} > 50000) "
-                f"for solver {self.solver}."
-            )
-        if X.shape[1] > X.shape[0] and self.solver in ['svrg', 'saga']:
-            msg = (
-                f"n_features ({X.shape[1]}) is bigger than "
-                f"n_samples ({X.shape[0]})"
-            )
-            return True, msg
+    def skip(self, objective, dataset):
+        if objective.fit_intercept:
+            return "no implemented with fit_intercept"
         if (self.accelerated or self.line_search) and self.solver != "pgd":
             return (
-                True,
                 f"accelerated or line_search is not available for "
                 f"{self.solver}"
             )
-
-        if fit_intercept:
-            return True, "no implemented with fit_intercept"
-        return False, None
+        n_samples, n_features = objective.get_objective()["X"].shape
+        if n_features > 50_000 and self.solver not in ['svrg', 'saga']:
+            return (
+                f"problem too large (n_features={n_features} > 50000) "
+                f"for solver {self.solver}."
+            )
+        if n_features > n_samples and self.solver in ['svrg', 'saga']:
+            return (
+                f"n_features ({n_features}) is bigger than "
+                f"n_samples ({n_samples})"
+            )
+        return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         y = (y > 0).astype(np.float64)

@@ -31,11 +31,6 @@ def check_test_solver_install(solver_class):
                 "Running snapml on MacOS takes a lot of time.\n"
                 "See PR 38 in benchopt/benchmark_logreg_l2"
             )
-        if is_numpy_2():
-            pytest.skip(
-                "SnapML is not supported with numpy >= 2.\n"
-                "See benchopt/benchmark_logreg_l2#51 for tracking."
-            )
     if solver_class.name.lower() == "lightning":
         if is_numpy_2():
             pytest.skip("Lightning is not compatible with numpy2.0")

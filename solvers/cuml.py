@@ -30,10 +30,10 @@ class Solver(BaseSolver):
         eps=1e-12, patience=5, strategy='iteration'
     )
 
-    def skip(self, X, y, lmbd, fit_intercept):
+    def skip(self, objective, dataset):
         if cuda_version is None:
-            return True, "cuml solver needs a nvidia GPU."
-        return False, None
+            return "cuml solver needs a nvidia GPU."
+        return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.lmbd = lmbd

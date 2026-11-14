@@ -22,11 +22,10 @@ class Solver(BaseSolver):
         ]
     }
 
-    def skip(self, X, y, lmbd, fit_intercept):
-        if fit_intercept:
-            return True, "no implemented with fit_intercept"
-
-        return False, None
+    def skip(self, objective, dataset):
+        if objective.fit_intercept:
+            return "no implemented with fit_intercept"
+        return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
 

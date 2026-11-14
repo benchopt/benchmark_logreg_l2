@@ -18,10 +18,10 @@ class Solver(BaseSolver):
         eps=1e-12, patience=10, strategy='iteration'
     )
 
-    def skip(self, X, y, lmbd, fit_intercept):
+    def skip(self, objective, dataset):
         if self.gpu and get_cuda_version() is None:
-            return True, "snapml[gpu=True] needs a GPU to run"
-        return False, None
+            return "snapml[gpu=True] needs a GPU to run"
+        return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd

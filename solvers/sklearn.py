@@ -31,11 +31,6 @@ class Solver(BaseSolver):
         eps=1e-12, patience=5, strategy='iteration'
     )
 
-    def skip(self, X, y, lmbd, fit_intercept):
-        if len(np.unique(y)) != 2 and self.solver == 'newton-cholesky':
-            return True, "Newton-Cholesky only works for binary classification"
-        return False, None
-
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd
 
