@@ -13,7 +13,8 @@ class Solver(BaseSolver):
     name = 'sklearn'
 
     install_cmd = 'conda'
-    requirements = ['scikit-learn']
+    # newton-cholesky needs scikit-learn 1.2.
+    requirements = ['scikit-learn>=1.2']
 
     parameters = {
         'solver': [
@@ -47,7 +48,7 @@ class Solver(BaseSolver):
         else:
             self.clf = LogisticRegression(
                 solver=self.solver, C=1 / self.lmbd,
-                penalty='l2', fit_intercept=fit_intercept, tol=1e-15
+                fit_intercept=fit_intercept, tol=1e-15
             )
 
     def run(self, n_iter):
