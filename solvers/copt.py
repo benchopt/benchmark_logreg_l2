@@ -20,15 +20,15 @@ class Solver(BaseSolver):
         'solver': ['pgd', 'svrg', 'saga'],
     }
 
-    def skip(self, objective, dataset):
-        if objective.fit_intercept:
+    def skip(self):
+        if self.objective_.fit_intercept:
             return "no implemented with fit_intercept"
         if (self.accelerated or self.line_search) and self.solver != "pgd":
             return (
                 f"accelerated or line_search is not available for "
                 f"{self.solver}"
             )
-        n_samples, n_features = objective.get_objective()["X"].shape
+        n_samples, n_features = self.objective_.get_objective()["X"].shape
         if n_features > 50_000 and self.solver not in ['svrg', 'saga']:
             return (
                 f"problem too large (n_features={n_features} > 50000) "
