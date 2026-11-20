@@ -2,6 +2,7 @@ import json
 import warnings
 
 import numpy as np
+from scipy import sparse
 from benchopt.config import get_data_path
 from sklearn.linear_model import LogisticRegressionCV
 
@@ -18,11 +19,19 @@ def get_lmbd_cv(dataset, X, y):
     if path.exists() and key in (lmbd_cv := json.loads(path.read_text())):
         return lmbd_cv[key]
 
+    # The grid is relative to L / 4, the smoothness constant of the loss, so
+    # that it follows the scale of the features.
+    if sparse.issparse(X):
+        L = sparse.linalg.svds(X, k=1)[1][0] ** 2
+    else:
+        L = np.linalg.norm(X, ord=2) ** 2
+    Cs = 4 / L * np.logspace(-2, 16, 37)
+
     lmbd = {}
     for fit_intercept in [False, True]:
         warnings.filterwarnings("ignore", category=FutureWarning)
         clf = LogisticRegressionCV(
-            Cs=np.logspace(-8, 8, 33), solver="newton-cg",
+            Cs=Cs, solver="newton-cg",
             scoring="neg_log_loss", fit_intercept=fit_intercept, n_jobs=-1
         ).fit(X, y)
         # sklearn minimizes C * sum(loss) + ||w||^2 / 2, so lmbd = 1 / C.
