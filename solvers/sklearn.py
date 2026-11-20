@@ -13,7 +13,8 @@ class Solver(BaseSolver):
     name = 'sklearn'
 
     install_cmd = 'conda'
-    requirements = ['scikit-learn']
+    # newton-cholesky needs scikit-learn 1.2.
+    requirements = ['scikit-learn>=1.2']
 
     parameters = {
         'solver': [
@@ -31,11 +32,6 @@ class Solver(BaseSolver):
         eps=1e-12, patience=5, strategy='iteration'
     )
 
-    def skip(self, X, y, lmbd, fit_intercept):
-        if len(np.unique(y)) != 2 and self.solver == 'newton-cholesky':
-            return True, "Newton-Cholesky only works for binary classification"
-        return False, None
-
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd
 
@@ -52,7 +48,7 @@ class Solver(BaseSolver):
         else:
             self.clf = LogisticRegression(
                 solver=self.solver, C=1 / self.lmbd,
-                penalty='l2', fit_intercept=fit_intercept, tol=1e-15
+                fit_intercept=fit_intercept, tol=1e-15
             )
 
     def run(self, n_iter):

@@ -8,7 +8,7 @@ class Dataset(BaseDataset):
     name = "ijcnn1"
 
     install_cmd = "conda"
-    requirements = ["pip:libsvmdata"]
+    requirements = ["pip::libsvmdata"]
 
     parameters = {
         'scaled': [True, False]

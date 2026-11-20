@@ -1,5 +1,5 @@
 from benchopt import BaseSolver
-from benchopt.utils.sys_info import get_cuda_version
+from benchopt.helpers.requires_gpu import gpu_available
 from benchopt.stopping_criterion import SufficientProgressCriterion
 
 import numpy as np
@@ -9,8 +9,6 @@ import cudf
 import cupy as cp
 import cupyx.scipy.sparse as cusparse
 from cuml.linear_model import LogisticRegression
-
-cuda_version = get_cuda_version()
 
 
 class Solver(BaseSolver):
@@ -30,10 +28,10 @@ class Solver(BaseSolver):
         eps=1e-12, patience=5, strategy='iteration'
     )
 
-    def skip(self, X, y, lmbd, fit_intercept):
-        if cuda_version is None:
-            return True, "cuml solver needs a nvidia GPU."
-        return False, None
+    def skip(self):
+        if not gpu_available(self):
+            return "cuml solver needs a nvidia GPU."
+        return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.lmbd = lmbd
@@ -60,7 +58,7 @@ class Solver(BaseSolver):
         )
 
     def run(self, n_iter):
-        self.clf.solver_model.max_iter = n_iter
+        self.clf.max_iter = n_iter
         self.clf.fit(self.X, self.y)
 
     def get_result(self):
