@@ -6,6 +6,8 @@ from sklearn.datasets import fetch_openml
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelBinarizer
 
+from benchmark_utils import get_lmbd_cv
+
 
 class Dataset(BaseDataset):
     name = "adult"
@@ -29,6 +31,9 @@ class Dataset(BaseDataset):
             scaler = StandardScaler(with_mean=False)
             X = scaler.fit_transform(X)
 
-        data = dict(X=X, y=y)
+        data = dict(
+            X=X, y=y,
+            lmbd_cv=get_lmbd_cv(self, X, y)
+        )
 
         return data

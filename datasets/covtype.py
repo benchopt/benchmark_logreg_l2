@@ -4,6 +4,8 @@ from benchopt import BaseDataset
 from libsvmdata import fetch_libsvm
 from sklearn.preprocessing import StandardScaler
 
+from benchmark_utils import get_lmbd_cv
+
 
 class Dataset(BaseDataset):
     name = "covtype_binary"
@@ -32,4 +34,7 @@ class Dataset(BaseDataset):
             scaler = StandardScaler(with_mean=False)
             X = scaler.fit_transform(X)
 
-        return dict(X=X, y=y)
+        return dict(
+            X=X, y=y,
+            lmbd_cv=get_lmbd_cv(self, X, y)
+        )

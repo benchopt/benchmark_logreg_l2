@@ -3,6 +3,8 @@ from benchopt import BaseDataset
 from libsvmdata import fetch_libsvm
 from sklearn.preprocessing import StandardScaler
 
+from benchmark_utils import get_lmbd_cv
+
 
 class Dataset(BaseDataset):
 
@@ -30,4 +32,7 @@ class Dataset(BaseDataset):
         y_test[y_test == y_test.min()] = -1
         y_test[y_test == y_test.max()] = 1
 
-        return dict(X=X, y=y, X_test=X_test, y_test=y_test)
+        return dict(
+            X=X, y=y, X_test=X_test, y_test=y_test,
+            lmbd_cv=get_lmbd_cv(self, X, y)
+        )
