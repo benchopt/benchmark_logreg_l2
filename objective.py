@@ -37,13 +37,14 @@ class Objective(BaseObjective):
         return dict(beta=np.zeros(self.X.shape[1] + self.fit_intercept))
 
     def evaluate_result(self, beta):
+        lmbd = self.lmbd * self.lmbd_scale
         train_loss, train_error = _compute_loss(
-            self.X, self.y, self.lmbd, beta, self.fit_intercept
+            self.X, self.y, lmbd, beta, self.fit_intercept
         )
         test_loss = test_error = None
         if self.X_test is not None:
             test_loss, test_error = _compute_loss(
-                self.X_test, self.y_test, self.lmbd, beta, self.fit_intercept
+                self.X_test, self.y_test, lmbd, beta, self.fit_intercept
             )
         return {
             "Train loss": train_loss,
