@@ -4,11 +4,6 @@ import pytest  # noqa: F401
 from benchopt.utils.sys_info import get_cuda_version
 
 
-def is_numpy_2():
-    import numpy as np
-    return np.__version__ > '2'
-
-
 def check_test_solver_install(solver_class):
     """Hook called in `test_solver_install`.
 
@@ -30,14 +25,4 @@ def check_test_solver_install(solver_class):
             pytest.skip(
                 "Running snapml on MacOS takes a lot of time.\n"
                 "See PR 38 in benchopt/benchmark_logreg_l2"
-            )
-    if solver_class.name.lower() == "lightning":
-        if is_numpy_2():
-            pytest.skip("Lightning is not compatible with numpy2.0")
-
-    if solver_class.name.lower() == 'copt':
-        if is_numpy_2():
-            pytest.skip(
-                "SnapML is not supported with numpy >= 2.\n"
-                "See benchopt/benchmark_logreg_l2#51 for tracking."
             )
