@@ -3,6 +3,8 @@ from benchopt import BaseDataset
 
 import numpy as np
 
+from benchmark_utils import get_lmbd_cv
+
 
 class Dataset(BaseDataset):
 
@@ -41,6 +43,9 @@ class Dataset(BaseDataset):
             X_test -= mu
             X_test /= sigma
 
-        data = dict(X=X, y=y, X_test=X_test, y_test=y_test)
+        data = dict(
+            X=X, y=y, X_test=X_test, y_test=y_test,
+            lmbd_cv=get_lmbd_cv(self, X, y)
+        )
 
         return data

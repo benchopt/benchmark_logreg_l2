@@ -17,6 +17,9 @@ $$
 y \\in \\mathbb{R}^n, X = [x_1^\\top, \\dots, x_n^\\top]^\\top \\in \\mathbb{R}^{n \\times p}
 $$
 
+The objective parameter ``lmbd`` is relative to $\\lambda_{cv}$, the value selected by 5-fold cross-validation on the train set of each dataset, on a grid going from $10^{-16} L/4$ to $100 L/4$, with $L = \\lVert X \\rVert_2^2$.
+It is computed once, with ``benchopt prepare``, and stored in ``<data_home>/lmbd_cv/<dataset name>.json``. Delete this file to recompute the values.
+
 
 Install
 --------

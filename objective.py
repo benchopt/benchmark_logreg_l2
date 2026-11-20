@@ -1,7 +1,6 @@
 from benchopt import BaseObjective
 
 import numpy as np
-from scipy import sparse
 
 
 def _compute_loss(X, y, lmbd, beta, fit_intercept):
@@ -22,14 +21,15 @@ class Objective(BaseObjective):
     min_benchopt_version = "1.10.1"
 
     parameters = {
-        'lmbd': [0.1, 1.0],
+        'lmbd': [0.1, 1.0, 10.0],
         'fit_intercept': [False, True]
     }
 
-    def set_data(self, X, y, X_test=None, y_test=None):
+    def set_data(self, X, y, lmbd_cv, X_test=None, y_test=None):
         self.X, self.y = X, y
         self.X_test, self.y_test = X_test, y_test
-        self.lmbd_scale = self._compute_lipschitz_constant() / 4
+        # lmbd is relative to the value selected by cross-validation.
+        self.lmbd_scale = lmbd_cv[str(self.fit_intercept)]
         msg = "Logistic loss is implemented with y in [-1, 1]"
         assert set(self.y) == {-1, 1}, msg
 
@@ -59,10 +59,3 @@ class Objective(BaseObjective):
             X=self.X, y=self.y, lmbd=self.lmbd * self.lmbd_scale,
             fit_intercept=self.fit_intercept
         )
-
-    def _compute_lipschitz_constant(self):
-        if not sparse.issparse(self.X):
-            L = np.linalg.norm(self.X, ord=2) ** 2
-        else:
-            L = sparse.linalg.svds(self.X, k=1)[1][0] ** 2
-        return L
