@@ -34,6 +34,10 @@ class Solver(BaseSolver):
         self.lmbd, self.fit_intercept = lmbd, fit_intercept
         self.n_features = X.shape[1]
 
+        # Run once per problem to absorb its setup costs (jit, CUDA) from the
+        # timings, as warm_up only runs once per solver.
+        self.run(1)
+
     def loss(self, w):
         beta, c = w[:self.n_features], w[self.n_features:].sum()
         y_X_beta = self.y * (self.X @ beta + c)

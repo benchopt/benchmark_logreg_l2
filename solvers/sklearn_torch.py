@@ -42,6 +42,10 @@ class Solver(BaseSolver):
             C=1 / lmbd, fit_intercept=fit_intercept, tol=1e-15
         )
 
+        # Run once per problem to absorb its setup costs (jit, CUDA) from the
+        # timings, as warm_up only runs once per solver.
+        self.run(1)
+
     def run(self, n_iter):
         self.clf.max_iter = n_iter
         with config_context(array_api_dispatch=True):

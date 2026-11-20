@@ -61,9 +61,9 @@ class Solver(BaseSolver):
         self.lmbd = lmbd
         self.w0 = jnp.zeros(X.shape[1] + fit_intercept)
 
-    def warm_up(self):
-        # Absorb the jit compilation out of the timings.
-        self.run_once()
+        # Run once per problem to absorb its setup costs (jit, CUDA) from the
+        # timings, as warm_up only runs once per solver.
+        self.run(1)
 
     def run(self, n_iter):
         self.coef = lbfgs(self.X, self.y, self.lmbd, self.w0, n_iter)
