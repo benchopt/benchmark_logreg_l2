@@ -46,9 +46,9 @@ class Solver(BaseSolver):
             gradient_tol=1e-15, step_size_tol=1e-15
         )
 
-    def warm_up(self):
-        # Absorb the numba compilation out of the timings.
-        self.run_once()
+        # Run once per problem to absorb its setup costs (jit, CUDA) from the
+        # timings, as warm_up only runs once per solver.
+        self.run(1)
 
     def run(self, n_iter):
         self.coef = np.zeros(self.n_coeffs)
