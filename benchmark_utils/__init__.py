@@ -19,6 +19,8 @@ def get_lmbd_cv(dataset, X, y):
     if path.exists() and key in (lmbd_cv := json.loads(path.read_text())):
         return lmbd_cv[key]
 
+    print(f"\nSelecting lmbd_cv for {key} by cross-validation, stored in "
+          f"{path}", flush=True)
     # The grid is relative to L / 4, the smoothness constant of the loss, so
     # that it follows the scale of the features.
     if sparse.issparse(X):
