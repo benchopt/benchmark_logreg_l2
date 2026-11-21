@@ -6,7 +6,7 @@ from sklearn.datasets import fetch_openml
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelBinarizer
 
-from benchmark_utils import get_lmbd_cv
+from benchmark_utils.lmbd_cv import get_lmbd_cv
 
 
 class Dataset(BaseDataset):

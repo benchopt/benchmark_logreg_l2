@@ -4,7 +4,7 @@ from benchopt import BaseDataset
 from libsvmdata import fetch_libsvm
 from sklearn.preprocessing import StandardScaler
 
-from benchmark_utils import get_lmbd_cv
+from benchmark_utils.lmbd_cv import get_lmbd_cv
 
 
 class Dataset(BaseDataset):
