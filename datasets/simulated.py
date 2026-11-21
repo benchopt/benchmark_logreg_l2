@@ -3,7 +3,7 @@ from benchopt import BaseDataset
 
 import numpy as np
 
-from benchmark_utils import get_lmbd_cv
+from benchmark_utils.lmbd_cv import get_lmbd_cv
 
 
 class Dataset(BaseDataset):
@@ -19,14 +19,8 @@ class Dataset(BaseDataset):
         'scaled': [True, False]
     }
 
-    def __init__(self, n_samples=10, n_features=50, scaled=True,
-                 random_state=42):
-        self.n_samples = n_samples
-        self.n_features = n_features
-        self.random_state = random_state
-
     def get_data(self):
-        rng = np.random.RandomState(self.random_state)
+        rng = np.random.RandomState(42)
         beta = rng.randn(self.n_features)
 
         X = rng.randn(self.n_samples, self.n_features)
