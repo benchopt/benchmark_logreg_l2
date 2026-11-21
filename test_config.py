@@ -21,6 +21,9 @@ def check_test_solver_install(solver_class):
         if cuda_version is None:
             pytest.xfail("Cuml needs a working GPU hardware.")
 
+    if solver_class.name.lower() == "optax-lbfgs" and is_platform_macOS:
+        pytest.xfail("jax[cuda12] is not available on MacOS.")
+
     if solver_class.name.lower() == 'snapml':
         if is_platform_macOS:
             pytest.skip(
