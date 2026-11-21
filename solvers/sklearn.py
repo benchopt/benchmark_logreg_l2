@@ -32,6 +32,12 @@ class Solver(BaseSolver):
         eps=1e-12, patience=5, strategy='iteration'
     )
 
+    def skip(self):
+        n_features = self.objective_.get_objective()["X"].shape[1]
+        if self.solver == "newton-cholesky" and n_features > 10_000:
+            return "newton-cholesky forms a dense n_features^2 hessian"
+        return None
+
     def set_objective(self, X, y, lmbd, fit_intercept):
         self.X, self.y, self.lmbd = X, y, lmbd
 
