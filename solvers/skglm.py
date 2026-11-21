@@ -5,7 +5,7 @@ import numpy as np
 from scipy import sparse
 from skglm.datafits import Logistic
 from skglm.penalties import L1_plus_L2, L2
-from skglm.solvers import LBFGS, AndersonCD, ProxNewton
+from skglm.solvers import LBFGS, AndersonCD
 
 
 class Solver(BaseSolver):
@@ -14,7 +14,7 @@ class Solver(BaseSolver):
     requirements = ["pip::skglm"]
 
     parameters = {
-        "solver": ["anderson-cd", "prox-newton", "lbfgs"],
+        "solver": ["anderson-cd", "lbfgs"],
     }
     parameter_template = "{solver}"
 
@@ -39,7 +39,7 @@ class Solver(BaseSolver):
         self.n_coeffs = X.shape[1] + fit_intercept
 
         # skglm averages the loss over samples, so the penalty is scaled by
-        # 1 / n_samples. CD solvers need a prox, which L2 lacks, so they use
+        # 1 / n_samples. CD needs a prox, which L2 lacks, so it uses
         # L1_plus_L2 with l1_ratio=0, the same penalty.
         self.datafit = Logistic()
         alpha = lmbd / X.shape[0]
@@ -48,15 +48,10 @@ class Solver(BaseSolver):
             self.optimizer = LBFGS(tol=1e-12)
         else:
             self.penalty = L1_plus_L2(alpha, l1_ratio=0.)
-            if self.solver == "anderson-cd":
-                # Bound the inner epochs so that one run stays short.
-                self.optimizer = AndersonCD(
-                    tol=1e-12, max_epochs=1000, fit_intercept=fit_intercept
-                )
-            else:
-                self.optimizer = ProxNewton(
-                    tol=1e-12, fit_intercept=fit_intercept
-                )
+            # Bound the inner epochs so that one run stays short.
+            self.optimizer = AndersonCD(
+                tol=1e-12, max_epochs=1000, fit_intercept=fit_intercept
+            )
 
         # Run once per problem to absorb its setup costs (jit, CUDA) from the
         # timings, as warm_up only runs once per solver.
