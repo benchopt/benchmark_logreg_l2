@@ -1,0 +1,17 @@
+# Summary plots across the problems first, then the per-problem plots.
+plots:
+  - pareto
+  - profile_area
+  - performance_profile
+  - objective_curve
+  - bar_chart
+  - boxplot
+  - table
+
+plot_configs:
+  pareto:
+    plot_kind: pareto
+    scale: semilog-x
+  performance_profile:
+    plot_kind: performance_profile
+    scale: semilog-x
