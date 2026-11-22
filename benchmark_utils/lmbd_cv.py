@@ -1,4 +1,5 @@
 import json
+import os
 import warnings
 
 import numpy as np
@@ -31,11 +32,16 @@ def get_lmbd_cv(dataset, X, y):
 
     lmbd = {}
     for fit_intercept in [False, True]:
-        warnings.filterwarnings("ignore", category=FutureWarning)
-        clf = LogisticRegressionCV(
-            Cs=Cs, solver="newton-cg",
-            scoring="neg_log_loss", fit_intercept=fit_intercept, n_jobs=-1
-        ).fit(X, y)
+        with warnings.catch_warnings():
+            # sklearn>=1.8 notices on the LogisticRegressionCV API changing in
+            # 1.10 (fitted attributes, l1_ratios): this code works with both.
+            warnings.filterwarnings(
+                "ignore", category=FutureWarning, module="sklearn"
+            )
+            clf = LogisticRegressionCV(
+                Cs=Cs, solver="newton-cg", scoring="neg_log_loss",
+                fit_intercept=fit_intercept, n_jobs=-1
+            ).fit(X, y)
         # sklearn minimizes C * sum(loss) + ||w||^2 / 2, so lmbd = 1 / C.
         lmbd[str(fit_intercept)] = 1 / clf.C_[0]
 
@@ -43,5 +49,8 @@ def get_lmbd_cv(dataset, X, y):
     lmbd_cv = json.loads(path.read_text()) if path.exists() else {}
     lmbd_cv[key] = lmbd
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(lmbd_cv, indent=2, sort_keys=True))
+    # Write then rename, so that concurrent runs never read a partial file.
+    tmp = path.with_suffix(f".{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(lmbd_cv, indent=2, sort_keys=True))
+    os.replace(tmp, path)
     return lmbd
