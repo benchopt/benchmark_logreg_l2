@@ -33,6 +33,8 @@ class Dataset(BaseDataset):
         # Binary tasks: mental arithmetic vs rest, and depression detection.
         'task': ['arithmetic_zyma2019', 'mdd_mumtaz2016'],
     }
+    # The smallest task, as the tests encode it with REVE on CPU.
+    test_parameters = {'task': ['arithmetic_zyma2019']}
 
     def _encode(self):
         """Encode the task windows with the frozen REVE encoder, once."""
