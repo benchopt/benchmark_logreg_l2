@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 from benchmark_utils.lmbd_cv import get_lmbd_cv
+from benchmark_utils.oeb_reve import encode_reve
 
 
 class Dataset(BaseDataset):
@@ -42,9 +43,6 @@ class Dataset(BaseDataset):
         if path.exists():
             return path
 
-        # Imported here, so that solvers' environments without torch and
-        # open_eeg_bench can run on the cached features.
-        from benchmark_utils.oeb_reve import encode_reve
         features = encode_reve(self.task)
 
         path.parent.mkdir(parents=True, exist_ok=True)
