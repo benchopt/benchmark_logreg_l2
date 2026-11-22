@@ -29,9 +29,8 @@ class Plot(BasePlot):
     def plot(self, df, tolerance):
         solved, speed, _ = _reliability_speed(df, tolerance)
         traces = [
-            dict(x=[speed[s]], y=[solved[s]], label=s, **self.get_style(s),
-                 description=f"{s}: {solved[s]:.0%} of the problems solved, "
-                             f"{speed[s]:.2g}x the time of the reference")
+            dict(x=[speed[s]], y=[solved[s]], label=s, marker_size=16,
+                 **self.get_style(s))
             for s in speed
         ]
         # The frontier links the solvers that no other is both faster and
@@ -42,7 +41,7 @@ class Plot(BasePlot):
                 x += [speed[s], speed[s]]
                 y += [y[-1] if y else solved[s], solved[s]]
         traces.append(dict(x=x, y=y, label="Pareto frontier",
-                           color=(0, 0, 0, .5), marker=0))
+                           color=(0, 0, 0, .5), marker=0, marker_size=0))
         return traces
 
     def get_metadata(self, df, tolerance):
