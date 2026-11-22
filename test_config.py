@@ -26,3 +26,9 @@ def check_test_solver_install(solver_class):
                 "Running snapml on MacOS takes a lot of time.\n"
                 "See PR 38 in benchopt/benchmark_logreg_l2"
             )
+
+
+def check_test_dataset_get_data(dataset_class):
+    """Hook called in `test_dataset_get_data`."""
+    if dataset_class.name.lower() == "criteo":
+        pytest.xfail("libsvmdata 0.5 no longer provides criteo.")
