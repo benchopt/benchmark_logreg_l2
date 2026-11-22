@@ -27,6 +27,14 @@ class Objective(BaseObjective):
         'fit_intercept': [False, True]
     }
 
+    def skip(self):
+        # Standardized linear probing features are centered: without
+        # intercept, the model cannot represent the class imbalance.
+        linear_probing = self.dataset_.name == "OpenEEGBench-REVE"
+        if linear_probing and not self.fit_intercept:
+            return "linear probing requires an intercept"
+        return None
+
     def set_data(self, X, y, lmbd_cv, X_test=None, y_test=None):
         self.X, self.y = X, y
         self.X_test, self.y_test = X_test, y_test
