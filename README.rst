@@ -20,6 +20,8 @@ $$
 The objective parameter ``lmbd`` is relative to $\\lambda_{cv}$, the value selected by 5-fold cross-validation on the train set of each dataset, on a grid going from $10^{-16} L/4$ to $100 L/4$, with $L = \\lVert X \\rVert_2^2$.
 It is computed once, with ``benchopt prepare``, and stored in ``<data_home>/lmbd_cv/<dataset name>.json``. Delete this file to recompute the values.
 
+The code and the absolute ``lmbd`` of the Benchopt NeurIPS 2022 paper are at the ``neurips2022`` tag. The config ``neurips2022_cases.yml`` runs the paper's cases with the current protocol.
+
 
 Install
 --------
