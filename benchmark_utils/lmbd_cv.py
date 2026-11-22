@@ -1,6 +1,5 @@
 import json
 import os
-import warnings
 
 import numpy as np
 from scipy import sparse
@@ -32,25 +31,21 @@ def get_lmbd_cv(dataset, X, y):
 
     lmbd = {}
     for fit_intercept in [False, True]:
-        with warnings.catch_warnings():
-            # sklearn>=1.8 notices on the LogisticRegressionCV API changing in
-            # 1.10 (fitted attributes, l1_ratios): this code works with both.
-            warnings.filterwarnings(
-                "ignore", category=FutureWarning, module="sklearn"
-            )
-            clf = LogisticRegressionCV(
-                Cs=Cs, solver="newton-cg", scoring="neg_log_loss",
-                fit_intercept=fit_intercept, n_jobs=-1
-            ).fit(X, y)
+        clf = LogisticRegressionCV(
+            Cs=Cs, l1_ratios=(0.,), solver="newton-cg", scoring="neg_log_loss",
+            fit_intercept=fit_intercept, use_legacy_attributes=False,
+            n_jobs=-1
+        ).fit(X, y)
         # sklearn minimizes C * sum(loss) + ||w||^2 / 2, so lmbd = 1 / C.
-        lmbd[str(fit_intercept)] = 1 / clf.C_[0]
+        lmbd[str(fit_intercept)] = 1 / clf.C_
 
-    # Re-read the file to keep the values written meanwhile by other runs.
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(f".{os.getpid()}.tmp")
+    # Re-read the file just before writing, to keep the values written
+    # meanwhile by other runs, then write and rename, so that concurrent runs
+    # never read a partial file.
     lmbd_cv = json.loads(path.read_text()) if path.exists() else {}
     lmbd_cv[key] = lmbd
-    path.parent.mkdir(parents=True, exist_ok=True)
-    # Write then rename, so that concurrent runs never read a partial file.
-    tmp = path.with_suffix(f".{os.getpid()}.tmp")
     tmp.write_text(json.dumps(lmbd_cv, indent=2, sort_keys=True))
     os.replace(tmp, path)
     return lmbd
