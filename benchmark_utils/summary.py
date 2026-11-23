@@ -16,20 +16,16 @@ def time_to_tolerance(df, tolerance):
 
     Returns a DataFrame with one row per problem and one column per solver.
     """
-    # The report shortens the names, and may merge solver variants or
-    # datasets parameters: use the full names it keeps when available.
-    name = {c: f"{c}_full_name" if f"{c}_full_name" in df else f"{c}_name"
-            for c in ["dataset", "objective", "solver"]}
-    problem = [name["dataset"], name["objective"]]
+    problem = ["dataset_name", "objective_name"]
     f_star = df.groupby(problem)["objective_value"].transform("min")
     sub_opt = (df["objective_value"] - f_star) / f_star.abs()
-    key = problem + [name["solver"]]
+    key = problem + ["solver_name"]
     reached = df[sub_opt <= tolerance].groupby(key + ["idx_rep"])["time"].min()
     n_reps = df.groupby(key)["idx_rep"].nunique()
     times = reached.groupby(key).median().reindex(n_reps.index)
     n_reached = reached.groupby(key).size().reindex(n_reps.index, fill_value=0)
     times[n_reached < n_reps / 2] = np.inf
-    return times.unstack(name["solver"])
+    return times.unstack("solver_name")
 
 
 def performance_profile(times):
