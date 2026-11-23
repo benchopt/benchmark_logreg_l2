@@ -10,6 +10,9 @@ class Dataset(BaseDataset):
 
     name = "Simulated"
 
+    # For the selection of lmbd_cv.
+    requirements = ["scikit-learn"]
+
     parameters = {
         'n_samples, n_features': [
             (200, 500),
