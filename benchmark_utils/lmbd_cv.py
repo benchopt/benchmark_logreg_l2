@@ -7,15 +7,16 @@ from benchopt.config import get_data_path
 from sklearn.linear_model import LogisticRegressionCV
 
 
-def get_lmbd_cv(dataset, X, y):
+def get_lmbd_cv(dataset, X, y, seed=None):
     """Return the lmbd selected by cross-validation for each fit_intercept.
 
     The values are computed once, when preparing the dataset, and stored in
-    <data_home>/lmbd_cv/<dataset name>.json, keyed by the dataset parameters
-    and then by str(fit_intercept).
+    <data_home>/lmbd_cv/<dataset name>.json, keyed by the dataset parameters,
+    and by the ``seed`` of the data if it is random, then by
+    str(fit_intercept).
     """
     path = get_data_path("lmbd_cv") / f"{dataset.name}.json"
-    key = str(dataset)
+    key = str(dataset) if seed is None else f"{dataset}, seed={seed}"
     if path.exists() and key in (lmbd_cv := json.loads(path.read_text())):
         return lmbd_cv[key]
 

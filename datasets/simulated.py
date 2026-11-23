@@ -19,8 +19,14 @@ class Dataset(BaseDataset):
         'scaled': [True, False]
     }
 
+    def prepare(self):
+        # Nothing to download, and the data depends on the repetition, which
+        # is not known when preparing.
+        pass
+
     def get_data(self):
-        rng = np.random.RandomState(self.get_seed(use_dataset=True))
+        seed = self.get_seed(use_dataset=True, use_repetition=True)
+        rng = np.random.RandomState(seed)
         beta = rng.randn(self.n_features)
 
         X = rng.randn(self.n_samples, self.n_features)
@@ -39,7 +45,7 @@ class Dataset(BaseDataset):
 
         data = dict(
             X=X, y=y, X_test=X_test, y_test=y_test,
-            lmbd_cv=get_lmbd_cv(self, X, y)
+            lmbd_cv=get_lmbd_cv(self, X, y, seed=seed)
         )
 
         return data
