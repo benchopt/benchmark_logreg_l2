@@ -1,0 +1,14 @@
+# The cases of the Benchopt NeurIPS 2022 paper, with the current protocol:
+# lmbd in {0.1, 1, 10} x lmbd_cv, with and without intercept, on the raw and
+# scaled datasets, for all the solvers. The paper's code and absolute lmbd
+# are at the `neurips2022` tag.
+dataset:
+  - ijcnn1
+  - rcv1
+  - news20
+  - madelon
+  - adult
+timeout: 300
+n_repetitions: 5
+
+output: logreg-l2_neurips2022_cases

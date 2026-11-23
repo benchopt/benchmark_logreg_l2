@@ -1,3 +1,4 @@
+import os
 import sys  # noqa: F401
 import pytest  # noqa: F401
 
@@ -26,3 +27,13 @@ def check_test_solver_install(solver_class):
                 "Running snapml on MacOS takes a lot of time.\n"
                 "See PR 38 in benchopt/benchmark_logreg_l2"
             )
+
+
+def check_test_dataset_get_data(dataset_class):
+    """Hook called in `test_dataset_get_data`."""
+    if dataset_class.name.lower() == "criteo":
+        pytest.skip("libsvmdata 0.5 no longer provides criteo.")
+    # The real datasets download from external servers: not to make the CI of
+    # each PR depend on them, they only run in the weekly CI, with --runxfail.
+    if os.environ.get("GITHUB_ACTIONS") and dataset_class.name != "Simulated":
+        pytest.xfail("Downloads the data, tested in the weekly CI.")

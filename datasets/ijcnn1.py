@@ -3,6 +3,8 @@ from benchopt import BaseDataset
 from libsvmdata import fetch_libsvm
 from sklearn.preprocessing import StandardScaler
 
+from benchmark_utils.lmbd_cv import get_lmbd_cv
+
 
 class Dataset(BaseDataset):
     name = "ijcnn1"
@@ -24,4 +26,7 @@ class Dataset(BaseDataset):
             X = scaler.fit_transform(X)
             X_test = scaler.transform(X_test)
 
-        return dict(X=X, y=y, X_test=X_test, y_test=y_test)
+        return dict(
+            X=X, y=y, X_test=X_test, y_test=y_test,
+            lmbd_cv=get_lmbd_cv(self, X, y)
+        )
