@@ -19,9 +19,7 @@ def _compute_loss(X, y, lmbd, beta, fit_intercept):
 class Objective(BaseObjective):
     name = "L2 Logistic Regression"
     min_benchopt_version = "1.10.1"
-    # LogisticRegressionCV(use_legacy_attributes=...) to select lmbd_cv. From
-    # conda: the pip wheel ships its own libomp, which crashes the OpenMP code
-    # of other packages, e.g. glum, on MacOS.
+    # LogisticRegressionCV(use_legacy_attributes=...) to select lmbd_cv.
     requirements = ["scikit-learn>=1.8"]
 
     parameters = {

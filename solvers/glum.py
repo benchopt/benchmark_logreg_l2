@@ -11,7 +11,8 @@ from glum import GeneralizedLinearRegressor
 class Solver(BaseSolver):
     name = "glum"
 
-    requirements = ["pip::glum"]
+    # From conda: the OpenMP runtime of the pip wheels crashes on MacOS.
+    requirements = ["glum"]
 
     parameters = {
         "solver": ["irls-cd", "irls-ls", "lbfgs"],
