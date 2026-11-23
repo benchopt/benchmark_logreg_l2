@@ -20,7 +20,7 @@ class Dataset(BaseDataset):
     }
 
     def get_data(self):
-        rng = np.random.RandomState(42)
+        rng = np.random.RandomState(self.get_seed(use_dataset=True))
         beta = rng.randn(self.n_features)
 
         X = rng.randn(self.n_samples, self.n_features)
