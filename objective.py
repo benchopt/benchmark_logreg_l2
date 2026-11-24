@@ -37,6 +37,11 @@ class Objective(BaseObjective):
 
     def set_data(self, X, y, lmbd_cv, X_test=None, y_test=None):
         self.X, self.y = X, y
+        # The solvers get X in its dtype, while the loss is evaluated in
+        # float64, so that float32 data does not limit its precision.
+        self.X_eval = X.astype(np.float64, copy=False)
+        if X_test is not None:
+            X_test = X_test.astype(np.float64, copy=False)
         self.X_test, self.y_test = X_test, y_test
         # lmbd is relative to the value selected by cross-validation.
         self.lmbd_cv = lmbd_cv[str(self.fit_intercept)]
@@ -48,8 +53,9 @@ class Objective(BaseObjective):
 
     def evaluate_result(self, beta):
         lmbd = self.lmbd * self.lmbd_cv
+        beta = np.asarray(beta, dtype=np.float64)
         train_loss, train_error = _compute_loss(
-            self.X, self.y, lmbd, beta, self.fit_intercept
+            self.X_eval, self.y, lmbd, beta, self.fit_intercept
         )
         test_loss = test_error = None
         if self.X_test is not None:

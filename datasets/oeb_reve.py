@@ -33,7 +33,12 @@ class Dataset(BaseDataset):
     parameters = {
         # Binary tasks: mental arithmetic vs rest, and depression detection.
         'task': ['arithmetic_zyma2019', 'mdd_mumtaz2016'],
+        # Precision of the features given to the solvers, e.g. to compare the
+        # GPU solvers in float32 with dtype=float32.
+        'dtype': ['float64'],
     }
+    # Too many features for the solvers forming a dense hessian.
+    large = True
     # The smallest task, as the tests encode it with REVE on CPU.
     test_parameters = {'task': ['arithmetic_zyma2019']}
 
@@ -59,8 +64,13 @@ class Dataset(BaseDataset):
         scaler = StandardScaler()
         X = scaler.fit_transform(X)
         X_test = scaler.transform(X_test)
+        # Selected on the float64 features, and stored under the float64 name,
+        # so that both dtypes solve the same problem.
+        float64 = self.get_instance(task=self.task, dtype="float64")
+        lmbd_cv = get_lmbd_cv(float64, X, data["y_train"])
 
         return dict(
-            X=X, y=data["y_train"], X_test=X_test, y_test=data["y_test"],
-            lmbd_cv=get_lmbd_cv(self, X, data["y_train"])
+            X=X.astype(self.dtype), y=data["y_train"],
+            X_test=X_test.astype(self.dtype), y_test=data["y_test"],
+            lmbd_cv=lmbd_cv,
         )
