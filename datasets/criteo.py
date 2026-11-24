@@ -13,6 +13,9 @@ class Dataset(BaseDataset):
     install_cmd = 'conda'
     requirements = ['libsvmdata', 'scikit-learn']
 
+    # Too many features for the solvers forming a dense hessian.
+    large = True
+
     parameters = {
         'scaled': [True, False]
     }

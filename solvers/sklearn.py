@@ -33,8 +33,8 @@ class Solver(BaseSolver):
     )
 
     def skip(self):
-        n_features = self.objective_.get_objective()["X"].shape[1]
-        if self.solver == "newton-cholesky" and n_features > 10_000:
+        large = getattr(self.dataset_, "large", False)
+        if self.solver == "newton-cholesky" and large:
             return "newton-cholesky forms a dense n_features^2 hessian"
         return None
 

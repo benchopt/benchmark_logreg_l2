@@ -29,8 +29,8 @@ class Solver(BaseSolver):
     )
 
     def skip(self):
-        n_features = self.objective_.get_objective()["X"].shape[1]
-        if self.solver.startswith("irls") and n_features > 10_000:
+        large = getattr(self.dataset_, "large", False)
+        if self.solver.startswith("irls") and large:
             return "irls forms a dense n_features x n_features hessian"
         return None
 
