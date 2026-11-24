@@ -5,7 +5,6 @@ from benchopt import BaseSolver
 from benchopt.helpers.requires_gpu import gpu_available
 from benchopt.stopping_criterion import SufficientProgressCriterion
 
-from scipy import sparse
 import torch
 from sklearn import config_context
 from sklearn.exceptions import ConvergenceWarning
@@ -29,7 +28,7 @@ class Solver(BaseSolver):
             return "needs SCIPY_ARRAY_API=1 in the environment"
         if not gpu_available(self):
             return "needs a GPU"
-        if sparse.issparse(self.objective_.get_objective()["X"]):
+        if getattr(self.dataset_, "sparse", False):
             return "the array API does not support sparse data"
         return None
 

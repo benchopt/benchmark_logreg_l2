@@ -15,6 +15,8 @@ class Dataset(BaseDataset):
 
     # Too many features for the solvers forming a dense hessian.
     large = True
+    # Sparse features, for the solvers that only support dense ones.
+    sparse = True
 
     parameters = {
         'scaled': [True, False]
