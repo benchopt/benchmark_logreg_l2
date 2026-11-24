@@ -34,8 +34,9 @@ class Solver(BaseSolver):
         return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
-        self.X = torch.as_tensor(X, dtype=torch.float64, device="cuda")
-        self.y = torch.as_tensor(y, dtype=torch.float64, device="cuda")
+        # Keep the dtype of the data, and use it for y.
+        self.X = torch.as_tensor(X, device="cuda")
+        self.y = torch.as_tensor(y, dtype=self.X.dtype, device="cuda")
 
         warnings.filterwarnings('ignore', category=ConvergenceWarning)
         self.clf = LogisticRegression(

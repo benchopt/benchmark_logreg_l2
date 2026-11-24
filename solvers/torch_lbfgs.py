@@ -25,12 +25,12 @@ class Solver(BaseSolver):
         if sparse.issparse(X):
             X = X.tocsr()
             self.X = torch.sparse_csr_tensor(
-                X.indptr, X.indices, X.data, X.shape,
-                dtype=torch.float64, device="cuda"
+                X.indptr, X.indices, X.data, X.shape, device="cuda"
             )
         else:
-            self.X = torch.as_tensor(X, dtype=torch.float64, device="cuda")
-        self.y = torch.as_tensor(y, dtype=torch.float64, device="cuda")
+            self.X = torch.as_tensor(X, device="cuda")
+        # Keep the dtype of the data, and use it for y and the iterates.
+        self.y = torch.as_tensor(y, dtype=self.X.dtype, device="cuda")
         self.lmbd, self.fit_intercept = lmbd, fit_intercept
         self.n_features = X.shape[1]
 
@@ -48,7 +48,7 @@ class Solver(BaseSolver):
 
     def run(self, n_iter):
         w = torch.zeros(
-            self.n_features + self.fit_intercept, dtype=torch.float64,
+            self.n_features + self.fit_intercept, dtype=self.X.dtype,
             device="cuda", requires_grad=True
         )
         if n_iter:

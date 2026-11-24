@@ -54,12 +54,13 @@ class Solver(BaseSolver):
 
     def set_objective(self, X, y, lmbd, fit_intercept):
         if sparse.issparse(X):
-            self.X = jsparse.BCOO.from_scipy_sparse(X.astype(np.float64))
+            self.X = jsparse.BCOO.from_scipy_sparse(X)
         else:
-            self.X = jnp.asarray(X, dtype=jnp.float64)
-        self.y = jnp.asarray(y, dtype=jnp.float64)
+            self.X = jnp.asarray(X)
+        # Keep the dtype of the data, and use it for y and the iterates.
+        self.y = jnp.asarray(y, dtype=X.dtype)
         self.lmbd = lmbd
-        self.w0 = jnp.zeros(X.shape[1] + fit_intercept)
+        self.w0 = jnp.zeros(X.shape[1] + fit_intercept, dtype=X.dtype)
 
         # Run once per problem to absorb its setup costs (jit, CUDA) from the
         # timings, as warm_up only runs once per solver.
