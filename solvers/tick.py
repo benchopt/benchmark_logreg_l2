@@ -1,4 +1,5 @@
 from benchopt import BaseSolver
+from benchopt.stopping_criterion import SufficientProgressCriterion
 
 import numpy as np
 from scipy import sparse
@@ -18,6 +19,12 @@ class Solver(BaseSolver):
         'solver': ['svrg', 'saga', 'sdca'],
     }
     parameter_template = "{solver}"
+
+    # A patience of 10 points lets the stochastic solvers pass their first
+    # iterations, where the loss can be above its initial value.
+    stopping_criterion = SufficientProgressCriterion(
+        eps=1e-12, patience=10, strategy='iteration'
+    )
 
     references = [
         "E. Bacry, M. Bompaire, S. Gaïffas and S. V. Poulsen, "

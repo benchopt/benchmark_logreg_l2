@@ -28,8 +28,10 @@ class Solver(BaseSolver):
         ],
     }
     parameter_template = "{solver}"
+    # A patience of 10 points lets the stochastic solvers pass their first
+    # iterations, where the loss can be above its initial value.
     stopping_criterion = SufficientProgressCriterion(
-        eps=1e-12, patience=5, strategy='iteration'
+        eps=1e-12, patience=10, strategy='iteration'
     )
 
     def skip(self):
