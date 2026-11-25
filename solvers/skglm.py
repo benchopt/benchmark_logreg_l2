@@ -31,6 +31,9 @@ class Solver(BaseSolver):
     def skip(self):
         if self.solver == "lbfgs" and self.objective_.fit_intercept:
             return "lbfgs does not fit an intercept"
+        large = getattr(self.dataset_, "large", False)
+        if self.solver == "anderson-cd" and large:
+            return "single anderson-cd calls take hours with many features"
         return None
 
     def set_objective(self, X, y, lmbd, fit_intercept):
