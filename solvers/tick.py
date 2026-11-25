@@ -52,24 +52,27 @@ class Solver(BaseSolver):
         # penalized.
         self.model = ModelLogReg(fit_intercept=fit_intercept).fit(X, y)
         if self.solver == 'sdca':
-            prox = ProxZero()
-            self.optimizer = SDCA(
-                l_l2sq=lmbd / n_samples, tol=0, verbose=False, seed=42
-            )
+            self.prox = ProxZero()
+            self.klass = SDCA
+            self.kwargs = dict(l_l2sq=lmbd / n_samples)
         else:
-            prox = ProxL2Sq(strength=lmbd / n_samples, range=(0, n_features))
-            klass = dict(svrg=SVRG, saga=SAGA)[self.solver]
-            self.optimizer = klass(
-                step=1 / self.model.get_lip_max(), tol=0, verbose=False,
-                seed=42,
+            self.prox = ProxL2Sq(
+                strength=lmbd / n_samples, range=(0, n_features)
             )
-        self.optimizer.set_model(self.model).set_prox(prox)
+            self.klass = dict(svrg=SVRG, saga=SAGA)[self.solver]
+            self.kwargs = dict(step=1 / self.model.get_lip_max())
 
     def run(self, n_iter):
         self.coef = np.zeros(self.model.n_coeffs)
         if n_iter:
-            self.optimizer.max_iter = n_iter
-            self.coef = self.optimizer.solve()
+            # A new solver for each run, as tick restarts from the previous
+            # solution. Only the last iterate is recorded, to bound memory.
+            optimizer = self.klass(
+                max_iter=n_iter, tol=0, verbose=False, seed=42,
+                record_every=n_iter, **self.kwargs
+            )
+            optimizer.set_model(self.model).set_prox(self.prox)
+            self.coef = optimizer.solve()
 
     def get_result(self):
         return dict(beta=self.coef)
