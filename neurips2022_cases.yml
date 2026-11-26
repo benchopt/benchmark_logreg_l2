@@ -8,7 +8,7 @@ dataset:
   - news20
   - madelon
   - adult
-timeout: 300
+timeout: 600
 n_repetitions: 5
 
 output: logreg-l2_neurips2022_cases

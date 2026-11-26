@@ -20,7 +20,7 @@ class Objective(BaseObjective):
     name = "L2 Logistic Regression"
     min_benchopt_version = "1.10.1"
     # LogisticRegressionCV(use_legacy_attributes=...) to select lmbd_cv.
-    requirements = ["pip::scikit-learn>=1.8"]
+    requirements = ["scikit-learn>=1.8"]
 
     parameters = {
         'lmbd': [0.1, 1.0, 10.0],

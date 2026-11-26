@@ -21,6 +21,9 @@ def check_test_solver_install(solver_class):
         if cuda_version is None:
             pytest.xfail("Cuml needs a working GPU hardware.")
 
+    if solver_class.name.lower() == "optax-lbfgs" and is_platform_macOS:
+        pytest.xfail("jax[cuda12] is not available on MacOS.")
+
     if solver_class.name.lower() == 'snapml':
         if is_platform_macOS:
             pytest.skip(
@@ -37,3 +40,10 @@ def check_test_dataset_get_data(dataset_class):
     # each PR depend on them, they only run in the weekly CI, with --runxfail.
     if os.environ.get("GITHUB_ACTIONS") and dataset_class.name != "Simulated":
         pytest.xfail("Downloads the data, tested in the weekly CI.")
+
+
+def check_test_solver_run(solver_class):
+    """Hook called in `test_solver_run`."""
+    gpu_solvers = ("optax-lbfgs", "sklearn-torch", "torch-lbfgs")
+    if solver_class.name.lower() in gpu_solvers and get_cuda_version() is None:
+        pytest.xfail(f"{solver_class.name} needs a GPU.")
