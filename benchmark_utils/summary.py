@@ -1,7 +1,9 @@
 import numpy as np
 
 # Tolerances on the relative suboptimality, offered in the summary plots.
-TOLERANCES = [1e-10, 1e-6]
+TOLERANCES = [1e-10, 1e-6, 1e-4]
+# Timeout of the runs in neurips2022_cases.yml, which the results do not store.
+TIMEOUT = 600
 # Grid of tau, the time relative to the fastest solver, for the profiles.
 TAUS = np.logspace(0, 3.5, 100)
 
